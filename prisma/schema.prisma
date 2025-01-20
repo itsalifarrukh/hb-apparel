@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  avatarUrl              String    @default("/DefaultAvatar.png")
+  avatarLocalPath        String?
+  username               String?   @unique
+  email                  String?   @unique
+  firstName              String?
+  lastName               String?
+  phoneNumber            String?
+  password               String?
+  role                   Role      @default(USER)
+  isEmailVerified        Boolean   @default(false)
+  verificationCode       String?
+  verificationCodeExpiry DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  accounts Account[]
+  reviews  Review[]
+
+  @@index([username])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @default(0) // Rating on a scale (e.g., 1-5)
+  comment   String? // Optional review text
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id                 String @id @default(uuid())
+  name               String
+  category           String
+  mainImage          String
+  description        String
+  price              Float
+  discount           Float
+  discountedPrice    Float
+  stock              Int    @default(0)
+  sizes              String
+  colors             String
+  availabilityStatus String
+
+  imageUrl String[]
+
+  // Relations
+  reviews Review[] // Relation: Products can have multiple reviews
+}
+
+enum Role {
+  USER
+  ADMIN
+}
