@@ -68,6 +68,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email || undefined,
             username: user.username || undefined,
             isEmailVerified: user.isEmailVerified,
+            role: user.role,
           };
         } catch (err: unknown) {
           const error =

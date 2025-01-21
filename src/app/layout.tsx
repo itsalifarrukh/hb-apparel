@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/components/layout/Navbar"; // Import your Navbar component
+import Footer from "@/components/layout/Footer"; // Import your Footer component
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -42,7 +44,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <div className="flex flex-col min-h-screen">
+              {/* Add Navbar at the top */}
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              {/* Add Footer at the bottom */}
+              <Footer />
+            </div>
           </ThemeProvider>
           <Toaster />
         </body>
