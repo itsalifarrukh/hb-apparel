@@ -13,6 +13,14 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { UserDropDown } from "./UserDropDown";
+import { ModeToggle } from "./ModeToggle";
 
 const menComponents: { title: string; href: string; description: string }[] = [
   {
@@ -131,81 +139,189 @@ const kidsComponents: { title: string; href: string; description: string }[] = [
   },
 ];
 
+export function DesktopNavigation() {
+  return (
+    <NavigationMenuList>
+      <NavigationMenuItem>
+        <Link href="/about-us" legacyBehavior passHref>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            About
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/docs" legacyBehavior passHref>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            New Arrivals
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem>
+      {/* Existing Men, Women, Kids dropdown navigation */}
+      <NavigationMenuItem>
+        <NavigationMenuTrigger>Men</NavigationMenuTrigger>
+        <NavigationMenuContent>
+          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+            {menComponents.map((component) => (
+              <ListItem
+                key={component.title}
+                title={component.title}
+                href={component.href}
+              >
+                {component.description}
+              </ListItem>
+            ))}
+          </ul>
+        </NavigationMenuContent>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuTrigger>Women</NavigationMenuTrigger>
+        <NavigationMenuContent>
+          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+            {womenComponents.map((component) => (
+              <ListItem
+                key={component.title}
+                title={component.title}
+                href={component.href}
+              >
+                {component.description}
+              </ListItem>
+            ))}
+          </ul>
+        </NavigationMenuContent>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuTrigger>Kids</NavigationMenuTrigger>
+        <NavigationMenuContent>
+          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+            {kidsComponents.map((component) => (
+              <ListItem
+                key={component.title}
+                title={component.title}
+                href={component.href}
+              >
+                {component.description}
+              </ListItem>
+            ))}
+          </ul>
+        </NavigationMenuContent>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <Link href="/contact-us" legacyBehavior passHref>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            Contact
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem>
+    </NavigationMenuList>
+  );
+}
+
+// Mobile Navigation Component
+function MobileNavigation() {
+  return (
+    <div className="space-y-4 p-4">
+      {/* Links Section */}
+      <div className="space-y-2">
+        <Link
+          href="/about-us"
+          className="block py-2 border-b text-lg hover:bg-accent text-left"
+        >
+          About
+        </Link>
+
+        <Link
+          href="/new-arrivals"
+          className="block py-2 border-b text-lg hover:bg-accent text-left"
+        >
+          New Arrivals
+        </Link>
+
+        <Accordion type="single" collapsible>
+          <AccordionItem value="men">
+            <AccordionTrigger className="text-lg text-left">
+              Men&apos;s
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {menComponents.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block py-1 pl-4 hover:bg-accent text-left"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="women">
+            <AccordionTrigger className="text-lg text-left">
+              Women&apos;s
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {womenComponents.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block py-1 pl-4 hover:bg-accent text-left"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="kids">
+            <AccordionTrigger className="text-lg text-left">
+              Kids
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {kidsComponents.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block py-1 pl-4 hover:bg-accent text-left"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <Link
+          href="/contact-us"
+          className="block py-2 border-t text-lg hover:bg-accent text-left"
+        >
+          Contact
+        </Link>
+      </div>
+
+      {/* Centered UserDropdown and ModeToggle */}
+      <div className="flex flex-row mx-auto justify-center items-center space-x-4">
+        <UserDropDown />
+        <ModeToggle />
+      </div>
+    </div>
+  );
+}
+
 export function NavbarMenu() {
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
-          <Link href="/about-us" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              About
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <Link href="/docs" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              New Arrivals
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Men</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-              {menComponents.map((component) => (
-                <ListItem
-                  key={component.title}
-                  title={component.title}
-                  href={component.href}
-                >
-                  {component.description}
-                </ListItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Women</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-              {womenComponents.map((component) => (
-                <ListItem
-                  key={component.title}
-                  title={component.title}
-                  href={component.href}
-                >
-                  {component.description}
-                </ListItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Kids</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-              {kidsComponents.map((component) => (
-                <ListItem
-                  key={component.title}
-                  title={component.title}
-                  href={component.href}
-                >
-                  {component.description}
-                </ListItem>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <Link href="/contact-us" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Contact
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <>
+      <NavigationMenu className="hidden md:block">
+        <DesktopNavigation />
+      </NavigationMenu>
+      <div className="md:hidden">
+        <MobileNavigation />
+      </div>
+    </>
   );
 }
 

@@ -24,7 +24,7 @@ export function UserDropDown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant="ghost">
           <UserRound />
         </Button>
       </DropdownMenuTrigger>
