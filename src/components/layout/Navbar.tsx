@@ -18,7 +18,7 @@ const Navbar = () => {
   const isLoggedIn = !!session;
 
   return (
-    <nav className="bg-background border-b">
+    <nav className="sticky top-0 z-50 w-full border-b shadow-md backdrop-blur-md bg-gradient-to-r from-[hsl(var(--brand-indigo))]/80 via-[hsl(var(--brand-blue))]/75 to-[hsl(var(--brand-cyan))]/70 dark:from-[hsl(var(--brand-dark-bg-start))]/80 dark:via-[hsl(var(--brand-dark-bg-end))]/80 dark:to-[hsl(var(--brand-dark-bg-end))]/80">
       <div className="max-w-7xl mx-auto px-4">
         {/* Desktop Layout */}
         <div className="hidden md:flex justify-between items-center h-16">
@@ -34,7 +34,7 @@ const Navbar = () => {
                 height={40}
                 quality={100}
               />
-              <span className="self-center text-xl text-custom-blue ml-1 font-semibold whitespace-nowrap dark:text-custom-blue">
+              <span className="self-center text-xl text-white ml-1 font-semibold whitespace-nowrap dark:text-white">
                 BH Apparel
               </span>
             </Link>

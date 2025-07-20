@@ -29,8 +29,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className=" bg-background py-8 ">
-      <div className="container mx-auto px-4 sm:px-4 lg:px-4 py-6">
+    <footer className="relative overflow-hidden py-20 bg-transparent">
+      {/* decorative blobs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-20 left-10 h-60 w-60 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-400/20 blur-2xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl p-8 md:p-14 rounded-3xl bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
         <div className="flex flex-col sm:flex-row items-start gap-8">
           {/* Logo Section */}
           <div className="flex-shrink-0"></div>
