@@ -22,8 +22,8 @@ const categories = [
 
 const CategoryGrid = () => {
   return (
-    <section className="mx-auto max-w-7xl py-16 px-4 sm:px-6 lg:px-8">
-      <h2 className="mb-10 text-center text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+    <section className="mx-auto max-w-7xl py-16 px-4 sm:px-6 lg:px-8 bg-[#E3F2FD]">
+      <h2 className="mb-10 text-center text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1565C0] dark:text-[#E3F2FD]">
         Shop by Category
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -40,7 +40,7 @@ const CategoryGrid = () => {
               height={700}
               className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0" />
             <h3 className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-2xl font-bold text-white drop-shadow-lg group-hover:translate-y-1 transition-transform">
               {cat.title}
             </h3>

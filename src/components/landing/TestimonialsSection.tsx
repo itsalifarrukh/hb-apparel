@@ -8,7 +8,7 @@ const testimonials = [
     avatar:
       "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&q=80&w=160",
     quote:
-      "BH Apparel sets the bar high for quality and style. Every piece feels tailor-made!",
+      "HB Apparel sets the bar high for quality and style. Every piece feels tailor-made!",
   },
   {
     name: "Daniel K.",
@@ -30,18 +30,9 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section
-      id="testimonials"
-      className="relative overflow-hidden py-20 bg-transparent"
-    >
-      {/* decorative blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 right-20 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-80 w-80 rounded-full bg-indigo-500/20 blur-2xl" />
-      </div>
-
-      <div className="relative mx-auto max-w-6xl p-8 md:p-14 rounded-3xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <h2 className="mb-12 text-center text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-400 dark:to-teal-300 sm:text-5xl">
+    <section id="testimonials" className="py-20 bg-[#F7F7F7] dark:bg-[#455A64]">
+      <div className="section-container">
+        <h2 className="mb-12 text-center text-4xl font-light tracking-tight text-[#263238] dark:text-white">
           What Our Customers Say
         </h2>
 
@@ -49,7 +40,7 @@ const TestimonialsSection = () => {
           {testimonials.map((t) => (
             <figure
               key={t.name}
-              className="flex flex-col items-center text-center bg-white/80 dark:bg-slate-800/60 rounded-2xl p-6 shadow-lg backdrop-blur-md ring-1 ring-black/5 dark:ring-white/10"
+              className="flex flex-col items-center text-center bg-white dark:bg-[#263238] rounded-lg p-6 shadow-md"
             >
               <Image
                 src={t.avatar}
@@ -58,12 +49,12 @@ const TestimonialsSection = () => {
                 height={80}
                 className="mb-4 h-20 w-20 rounded-full object-cover"
               />
-              <blockquote className="mb-4 text-gray-700 dark:text-gray-300 italic">
-                “{t.quote}”
+              <blockquote className="mb-4 text-[#455A64] dark:text-[#B0BEC5] italic">
+                "{t.quote}"
               </blockquote>
-              <figcaption className="font-semibold text-gray-900 dark:text-white">
+              <figcaption className="font-medium text-[#263238] dark:text-white">
                 {t.name}
-                <span className="block text-sm font-normal text-gray-500 dark:text-gray-400">
+                <span className="block text-sm font-normal text-[#455A64] dark:text-[#B0BEC5]">
                   {t.role}
                 </span>
               </figcaption>

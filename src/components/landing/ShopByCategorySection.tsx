@@ -22,37 +22,28 @@ const categories = [
 
 const ShopByCategorySection = () => {
   return (
-    <section
-      id="categories"
-      className="relative overflow-hidden py-20 bg-transparent"
-    >
-      {/* decorative blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-28 right-16 h-60 w-60 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-indigo-500/20 blur-2xl" />
-      </div>
-
-      <div className="relative mx-auto max-w-6xl p-8 md:p-14 rounded-3xl bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <h2 className="mb-12 text-center text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-400 dark:to-teal-300 sm:text-5xl">
+    <section id="categories" className="py-20 bg-[#F7F7F7] dark:bg-[#455A64]">
+      <div className="section-container">
+        <h2 className="mb-12 text-center text-4xl font-light tracking-tight text-[#263238] dark:text-white sm:text-5xl">
           Shop by Category
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((cat) => (
             <Link
               key={cat.title}
               href={cat.href}
-              className="group relative overflow-hidden rounded-3xl shadow-lg"
+              className="group relative overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow"
             >
               <Image
                 src={cat.img}
                 alt={cat.title}
-                width={600}
-                height={700}
-                className="h-72 w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                width={400}
+                height={500}
+                className="h-80 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-              <h3 className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-2xl font-bold text-white drop-shadow-lg group-hover:translate-y-1 transition-transform">
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+              <h3 className="absolute bottom-6 left-6 text-2xl font-light text-white tracking-wide">
                 {cat.title}
               </h3>
             </Link>

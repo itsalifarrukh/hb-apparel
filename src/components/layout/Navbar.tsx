@@ -18,35 +18,35 @@ const Navbar = () => {
   const isLoggedIn = !!session;
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b shadow-md backdrop-blur-md bg-gradient-to-r from-[hsl(var(--brand-indigo))]/80 via-[hsl(var(--brand-blue))]/75 to-[hsl(var(--brand-cyan))]/70 dark:from-[hsl(var(--brand-dark-bg-start))]/80 dark:via-[hsl(var(--brand-dark-bg-end))]/80 dark:to-[hsl(var(--brand-dark-bg-end))]/80">
-      <div className="max-w-7xl mx-auto px-4">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-[#263238]/80 backdrop-blur-md">
+      <div className="section-container">
         {/* Desktop Layout */}
         <div className="hidden md:flex justify-between items-center h-16">
           {/* Left: Logo */}
-          <div className="flex items-center ml-2">
-            <Link href="/" className="flex items-center">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-2">
               <Image
                 src={
                   theme === "dark" ? "/hb-logo-dark.png" : "/hb-logo-light.png"
                 }
                 alt="HB Apparel Logo"
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 quality={100}
               />
-              <span className="self-center text-xl text-white ml-1 font-semibold whitespace-nowrap dark:text-white">
-                BH Apparel
+              <span className="text-lg font-medium text-[#263238] dark:text-white">
+                HB Apparel
               </span>
             </Link>
           </div>
 
           {/* Center: Navigation Links */}
-          <div className="flex justify-center items-center space-x-4">
+          <div className="flex items-center">
             <NavbarMenu />
           </div>
 
           {/* Right: Icons */}
-          <div className="flex justify-end items-center space-x-4">
+          <div className="flex items-center space-x-4">
             {isLoggedIn && (
               <>
                 <Link href="/wishlist">
@@ -60,7 +60,12 @@ const Navbar = () => {
             )}
             {!isLoggedIn && (
               <Link href="/sign-in">
-                <Button variant="outline">Login</Button>
+                <Button
+                  variant="outline"
+                  className="text-sm"
+                >
+                  Sign In
+                </Button>
               </Link>
             )}
             <ModeToggle />
@@ -72,11 +77,18 @@ const Navbar = () => {
           {/* Left: Menu Drawer Trigger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-[#263238] dark:text-white"
+              >
+                <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px]">
+            <SheetContent
+              side="left"
+              className="w-[300px] bg-white dark:bg-[#263238]"
+            >
               <SheetHeader>
                 <NavbarMenu />
               </SheetHeader>
@@ -93,14 +105,14 @@ const Navbar = () => {
                 theme === "dark" ? "/hb-logo-dark.png" : "/hb-logo-light.png"
               }
               alt="HB Apparel Logo"
-              width={40}
-              height={40}
+              width={32}
+              height={32}
               quality={100}
             />
           </Link>
 
           {/* Right: Icons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {isLoggedIn && (
               <>
                 <Link href="/wishlist">
@@ -113,11 +125,16 @@ const Navbar = () => {
             )}
             {!isLoggedIn && (
               <Link href="/sign-in">
-                <Button variant="outline" size="sm">
-                  Login
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  Sign In
                 </Button>
               </Link>
             )}
+            <ModeToggle />
           </div>
         </div>
       </div>

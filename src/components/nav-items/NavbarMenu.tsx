@@ -143,18 +143,20 @@ export function DesktopNavigation() {
   return (
     <NavigationMenuList>
       <NavigationMenuItem>
-        <Link href="/about-us" legacyBehavior passHref>
-          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-            About
-          </NavigationMenuLink>
-        </Link>
+        <NavigationMenuLink
+          href="/about-us"
+          className={navigationMenuTriggerStyle()}
+        >
+          About
+        </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <Link href="/docs" legacyBehavior passHref>
-          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-            New Arrivals
-          </NavigationMenuLink>
-        </Link>
+        <NavigationMenuLink
+          href="/new-arrivals"
+          className={navigationMenuTriggerStyle()}
+        >
+          New Arrivals
+        </NavigationMenuLink>
       </NavigationMenuItem>
       {/* Existing Men, Women, Kids dropdown navigation */}
       <NavigationMenuItem>
@@ -206,11 +208,12 @@ export function DesktopNavigation() {
         </NavigationMenuContent>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <Link href="/contact-us" legacyBehavior passHref>
-          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-            Contact
-          </NavigationMenuLink>
-        </Link>
+        <NavigationMenuLink
+          href="/contact-us"
+          className={navigationMenuTriggerStyle()}
+        >
+          Contact
+        </NavigationMenuLink>
       </NavigationMenuItem>
     </NavigationMenuList>
   );

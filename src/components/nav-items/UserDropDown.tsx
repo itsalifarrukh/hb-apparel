@@ -24,8 +24,11 @@ export function UserDropDown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">
-          <UserRound />
+        <Button
+          variant="ghost"
+          className="p-0 w-10 h-10 flex items-center justify-center"
+        >
+          <UserRound className="w-6 h-6" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

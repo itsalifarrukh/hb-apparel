@@ -3,10 +3,10 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes"; // Import theme functionality
+import { useTheme } from "next-themes";
 
 const Footer = () => {
-  const { theme } = useTheme(); // Get the current theme (light or dark)
+  const { theme } = useTheme();
 
   const footerLinks = {
     Company: [
@@ -29,48 +29,36 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative overflow-hidden py-20 bg-transparent">
-      {/* decorative blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-20 left-10 h-60 w-60 rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-400/20 blur-2xl" />
-      </div>
+    <footer className="py-16 bg-[#F7F7F7] dark:bg-[#263238]">
+      <div className="section-container">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
 
-      <div className="relative mx-auto max-w-6xl p-8 md:p-14 rounded-3xl bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <div className="flex flex-col sm:flex-row items-start gap-8">
           {/* Logo Section */}
-          <div className="flex-shrink-0"></div>
+          <div className="flex-shrink-0">
+            <Image
+              src={
+                theme === "dark" ? "/hb-logo-dark.png" : "/hb-logo-light.png"
+              }
+              alt="HB Apparel Logo"
+              width={50}
+              height={50}
+            />
+            <p className="mt-4 text-sm text-[#455A64] dark:text-[#B0BEC5]">
+              Premium clothing for those who appreciate quality and style.
+            </p>
+          </div>
 
-          {/* Links and Info Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-6 flex-grow">
-            {/* About Section */}
-            <div>
-              <Image
-                src={
-                  theme === "dark" ? "/hb-logo-dark.png" : "/hb-logo-light.png"
-                }
-                alt="HB Apparel Logo"
-                width={60}
-                height={60}
-                className="object-contain"
-              />
-              <h3 className="text-xl font-bold mb-4">HB Apparel</h3>
-              <p className="text-sm leading-relaxed">
-                Premium clothing for those who appreciate quality and style.
-              </p>
-            </div>
-
-            {/* Links Section */}
+          {/* Links Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-grow">
             {Object.entries(footerLinks).map(([category, links]) => (
               <div key={category}>
-                <h4 className="font-bold text-lg mb-4">{category}</h4>
-                <ul className="space-y-2">
+                <h4 className="font-medium text-[#263238] dark:text-white">
+                  {category}
+                </h4>
+                <ul className="mt-2 space-y-2">
                   {links.map((link) => (
                     <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-sm transition-colors hover:underline"
-                      >
+                      <Link href={link.href} className="text-sm text-[#455A64] dark:text-[#B0BEC5] hover:underline">
                         {link.name}
                       </Link>
                     </li>
@@ -78,51 +66,30 @@ const Footer = () => {
                 </ul>
               </div>
             ))}
+          </div>
 
-            {/* Contact Info Section */}
-            <div>
-              <h4 className="font-bold text-lg mb-4">Contact Info</h4>
-              <ul className="space-y-2 text-sm">
-                <li>123 Spa Street</li>
-                <li>Karachi, Pakistan</li>
-                <li>Phone: (021) 123-4567</li>
-                <li>Email: info@zenithspa.pk</li>
-              </ul>
-            </div>
-
-            {/* Social Media Section */}
-            <div>
-              <h4 className="font-bold text-lg mb-4">Follow Us</h4>
-              <div className="flex space-x-4">
-                <Link
-                  href="#"
-                  aria-label="Facebook"
-                  className="transition-colors"
-                >
-                  <Facebook size={24} />
-                </Link>
-                <Link
-                  href="#"
-                  aria-label="Instagram"
-                  className="transition-colors"
-                >
-                  <Instagram size={24} />
-                </Link>
-                <Link
-                  href="#"
-                  aria-label="Twitter"
-                  className="transition-colors"
-                >
-                  <Twitter size={24} />
-                </Link>
-              </div>
+          {/* Social Media Section */}
+          <div>
+            <h4 className="font-medium text-[#263238] dark:text-white">
+              Follow Us
+            </h4>
+            <div className="flex space-x-4 mt-2">
+              <Link href="#" className="text-[#455A64] dark:text-[#B0BEC5] hover:text-[#263238] dark:hover:text-white">
+                <Facebook size={20} />
+              </Link>
+              <Link href="#" className="text-[#455A64] dark:text-[#B0BEC5] hover:text-[#263238] dark:hover:text-white">
+                <Instagram size={20} />
+              </Link>
+              <Link href="#" className="text-[#455A64] dark:text-[#B0BEC5] hover:text-[#263238] dark:hover:text-white">
+                <Twitter size={20} />
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Footer Bottom */}
-        <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-8 border-t border-[#B0BEC5] dark:border-[#455A64] pt-6 text-center">
+          <p className="text-sm text-[#455A64] dark:text-[#B0BEC5]">
             © {new Date().getFullYear()} HB Apparel. All rights reserved.
           </p>
         </div>
