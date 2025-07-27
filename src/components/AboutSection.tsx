@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const AboutSection = () => {
   return (
@@ -15,10 +16,13 @@ const AboutSection = () => {
               <br className="hidden sm:block" /> Live Bold
             </h2>
             <p className="mb-6 text-lg text-[#455A64] dark:text-[#B0BEC5] leading-relaxed">
-              At <span className="font-medium text-[#263238] dark:text-white">HB Apparel</span> we craft
-              garments that blend timeless design with contemporary energy. Our
-              mission is simple: empower you to move through life feeling
-              unstoppable.
+              At{" "}
+              <span className="font-medium text-[#263238] dark:text-white">
+                HB Apparel
+              </span>{" "}
+              we craft garments that blend timeless design with contemporary
+              energy. Our mission is simple: empower you to move through life
+              feeling unstoppable.
             </p>
 
             <ul className="mb-8 space-y-3 text-[#455A64] dark:text-[#B0BEC5]">
@@ -40,9 +44,9 @@ const AboutSection = () => {
               asChild
               className="bg-[#263238] text-white hover:bg-[#455A64] dark:bg-white dark:text-[#263238] dark:hover:bg-[#F7F7F7] px-6 py-6 text-sm uppercase tracking-wider"
             >
-              <a href="/" className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2">
                 Explore Collection <ArrowRight className="h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </div>
 

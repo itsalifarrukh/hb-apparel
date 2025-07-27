@@ -50,7 +50,7 @@ const TestimonialsSection = () => {
                 className="mb-4 h-20 w-20 rounded-full object-cover"
               />
               <blockquote className="mb-4 text-[#455A64] dark:text-[#B0BEC5] italic">
-                "{t.quote}"
+                &quot;{t.quote}&quot;
               </blockquote>
               <figcaption className="font-medium text-[#263238] dark:text-white">
                 {t.name}
