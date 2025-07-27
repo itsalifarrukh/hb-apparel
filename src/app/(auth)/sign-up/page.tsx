@@ -69,16 +69,10 @@ export default function SignUpForm() {
     setIsSubmitting(true); // Set the submitting state to true when the form is submitted
     try {
       // Call your API to create the user
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await axios.post("/api/user/auth/sign-up", data);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
+      // Axios automatically throws an error for non-2xx status codes
+      // and automatically parses JSON responses
 
       // Sign in the user after successful registration
       const result = await signIn("credentials", {
@@ -100,10 +94,13 @@ export default function SignUpForm() {
         router.push("/dashboard");
       }
     } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
       toast({
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Failed to create account",
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          "Failed to create account",
         variant: "destructive",
       });
     } finally {
