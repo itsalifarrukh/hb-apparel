@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 // GET - Fetch all deals with filtering options
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
     const expired = searchParams.get('expired');
 
     const now = new Date();
-    let whereClause: any = {};
+    let whereClause: Prisma.DealWhereInput = {};
 
     if (active === 'true') {
       whereClause = {

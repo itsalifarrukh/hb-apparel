@@ -77,7 +77,7 @@ export default function SignUpForm() {
     
     try {
       // Call your API to create the user
-      const response = await axios.post("/api/user/auth/sign-up", data);
+      await axios.post("/api/user/auth/sign-up", data);
 
       // Show success message and redirect to verify page
       toast({
@@ -161,7 +161,7 @@ export default function SignUpForm() {
       } else if (result?.ok && result.url) {
         router.push(result.url);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An unexpected error occurred",

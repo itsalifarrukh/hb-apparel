@@ -117,7 +117,7 @@ export default function SignInForm() {
       } else if (result?.ok && result.url) {
         router.push(result.url);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -199,7 +199,7 @@ export default function SignInForm() {
         </Form>
         <div className="text-center mt-6">
           <p className="text-[#455A64] dark:text-[#B0BEC5]">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/sign-up"
               className="text-[#263238] dark:text-white font-medium hover:underline transition-colors"

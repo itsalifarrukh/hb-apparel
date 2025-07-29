@@ -2,31 +2,6 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-type ProductWithFullIncludes = Prisma.ProductGetPayload<{
-  include: {
-    category: true;
-    subcategory: true;
-    deals: {
-      include: {
-        deal: true;
-      };
-    };
-    reviews: {
-      include: {
-        user: {
-          select: {
-            id: true;
-            username: true;
-          };
-        };
-      };
-    };
-    _count: {
-      select: { reviews: true };
-    };
-  };
-}>;
-
 type ProductUpdateInput = {
   name?: string;
   categoryId?: string;

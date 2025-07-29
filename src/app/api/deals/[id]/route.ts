@@ -2,23 +2,6 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-type DealWithIncludes = Prisma.DealGetPayload<{
-  include: {
-    products: {
-      include: {
-        product: {
-          select: {
-            id: true;
-            name: true;
-            price: true;
-            mainImage: true;
-          };
-        };
-      };
-    };
-  };
-}>;
-
 type DealUpdateInput = {
   name?: string;
   description?: string;
@@ -165,9 +148,9 @@ export async function PUT(
     if (endTime !== undefined) updateData.endTime = new Date(endTime);
 
     // Update deal
-    const updatedDeal = await prisma.deal.update({
+    await prisma.deal.update({
       where: { id },
-      data: updateData,
+      data: updateData
     });
 
     // Update products if provided
