@@ -22,12 +22,18 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { signIn } from "next-auth/react";
+import { SocialAccountAlert } from "@/components/ui/social-account-alert";
 
 export default function SignUpForm() {
   const [username, setUsername] = useState("");
   const [usernameMessage, setUsernameMessage] = useState("");
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [socialAccountAlert, setSocialAccountAlert] = useState<{
+    show: boolean;
+    message: string;
+    providers: string[];
+  }>({ show: false, message: "", providers: [] });
   const debounced = useDebounceCallback(setUsername, 500);
 
   const router = useRouter();
@@ -67,42 +73,45 @@ export default function SignUpForm() {
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSubmitting(true); // Set the submitting state to true when the form is submitted
+    setSocialAccountAlert({ show: false, message: "", providers: [] }); // Reset alert
+    
     try {
       // Call your API to create the user
       const response = await axios.post("/api/user/auth/sign-up", data);
 
-      // Axios automatically throws an error for non-2xx status codes
-      // and automatically parses JSON responses
-
-      // Sign in the user after successful registration
-      const result = await signIn("credentials", {
-        redirect: false,
-        identifier: data.email,
-        password: data.password,
+      // Show success message and redirect to verify page
+      toast({
+        title: "Success!",
+        description: "We've sent an OTP to your email address. Please verify it to complete your registration.",
+        variant: "default",
       });
 
-      if (result?.error) {
+      // Redirect to verify page with username
+      router.push(`/verify/${data.username}`);
+      
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse & {
+        socialProviders?: string[];
+        redirectToSignIn?: boolean;
+      }>;
+      
+      // Check if it's a social account conflict
+      if (axiosError.response?.status === 409 && axiosError.response.data.socialProviders) {
+        setSocialAccountAlert({
+          show: true,
+          message: axiosError.response.data.message || "You already have an account with social login.",
+          providers: axiosError.response.data.socialProviders
+        });
+      } else {
         toast({
-          title: "Error",
-          description: result.error,
+          title: "Sign Up Failed",
+          description:
+            axiosError.response?.data?.message ||
+            axiosError.message ||
+            "Failed to create account. Please try again.",
           variant: "destructive",
         });
-        return;
       }
-
-      if (result?.ok) {
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
-      toast({
-        title: "Error",
-        description:
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "Failed to create account",
-        variant: "destructive",
-      });
     } finally {
       setIsSubmitting(false); // Set the submitting state to false once the process is done
     }
@@ -135,23 +144,58 @@ export default function SignUpForm() {
       });
     }
   };
-  return (
-    <section className="relative flex justify-center items-center min-h-screen py-20 bg-[#E3F2FD]">
-      {/* decorative blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-20 h-56 w-56 rounded-full bg-[#BBDEFB]/60 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#90CAF9]/60 blur-2xl" />
-      </div>
 
-      <div className="relative w-full max-w-md p-8 space-y-8 rounded-3xl bg-[#BBDEFB]/80 dark:bg-[#1A237E]/80 backdrop-blur-xl shadow-2xl ring-1 ring-[#64B5F6]/30 dark:ring-[#42A5F5]/30">
+  const handleSocialSignIn = async (provider: string) => {
+    try {
+      const result = await signIn(provider, {
+        callbackUrl: "/dashboard",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast({
+          title: "Sign In Failed",
+          description: `Failed to sign in with ${provider}`,
+          variant: "destructive",
+        });
+      } else if (result?.ok && result.url) {
+        router.push(result.url);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloseSocialAlert = () => {
+    setSocialAccountAlert({ show: false, message: "", providers: [] });
+  };
+
+  return (
+    <section className="relative flex justify-center items-center min-h-screen py-20 bg-[#F7F7F7] dark:bg-[#263238]">
+
+      <div className="relative w-full max-w-md p-8 space-y-8 rounded-lg bg-white dark:bg-[#455A64] backdrop-blur-xl shadow-lg ring-1 ring-[#B0BEC5]/30 dark:ring-[#263238]/30">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6 text-[#1565C0] dark:text-[#E3F2FD]">
-            Create Your HB Apparel Account
+          <h1 className="text-3xl sm:text-4xl font-light tracking-tight mb-6 text-[#263238] dark:text-white">
+            Create Your Account
           </h1>
-          <p className="mb-4 text-[#1565C0] dark:text-[#E3F2FD]">
-            Join today for exclusive offers and style inspiration
+          <p className="mb-4 text-[#455A64] dark:text-[#B0BEC5]">
+            Join HB Apparel for exclusive offers and style inspiration
           </p>
         </div>
+        
+        {socialAccountAlert.show && (
+          <SocialAccountAlert
+            message={socialAccountAlert.message}
+            socialProviders={socialAccountAlert.providers}
+            onSignInWithProvider={handleSocialSignIn}
+            onClose={handleCloseSocialAlert}
+          />
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -167,13 +211,18 @@ export default function SignUpForm() {
                       debounced(e.target.value);
                     }}
                   />
-                  {isCheckingUsername && <Loader2 className="animate-spin" />}
+                  {isCheckingUsername && (
+                    <div className="flex items-center gap-2 text-sm text-[#455A64] dark:text-[#B0BEC5]">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Checking availability...
+                    </div>
+                  )}
                   {!isCheckingUsername && usernameMessage && (
                     <p
-                      className={`text-sm ${
+                      className={`text-sm font-medium ${
                         usernameMessage === "Username is unique"
-                          ? "text-green-500"
-                          : "text-red-500"
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-red-600 dark:text-red-400"
                       }`}
                     >
                       {usernameMessage}
@@ -190,7 +239,7 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input {...field} name="email" />
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-[#455A64] dark:text-[#B0BEC5] text-sm">
                     We will send you a verification code
                   </p>
                   <FormMessage />
@@ -209,24 +258,28 @@ export default function SignUpForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-medium bg-[#263238] text-white hover:bg-[#455A64] dark:bg-white dark:text-[#263238] dark:hover:bg-[#F7F7F7]" 
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
+                  Creating Account...
                 </>
               ) : (
-                "Sign Up"
+                "Create Account"
               )}
             </Button>
           </form>
         </Form>
-        <div className="text-center mt-4">
-          <p>
-            Already a member?{" "}
+        <div className="text-center mt-6">
+          <p className="text-[#455A64] dark:text-[#B0BEC5]">
+            Already have an account?{" "}
             <Link
               href="/sign-in"
-              className="text-[#42A5F5] hover:bg-cool-2 px-1 py-0.5 rounded transition-colors"
+              className="text-[#263238] dark:text-white font-medium hover:underline transition-colors"
             >
               Sign in
             </Link>
@@ -234,21 +287,23 @@ export default function SignUpForm() {
         </div>
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[#90CAF9] dark:border-[#1565C0]" />
+            <div className="w-full border-t border-[#B0BEC5] dark:border-[#455A64]" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2">Or continue with</span>
+            <span className="px-2 bg-white dark:bg-[#455A64] text-[#455A64] dark:text-[#B0BEC5]">Or continue with</span>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3">
-          <button
-            aria-label="Sign in with Google"
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Sign up with Google"
             onClick={() => handleGoogleSignUp()}
-            className="flex justify-center items-center px-4 py-2 border border-[#90CAF9] rounded-md shadow-sm text-sm font-medium text-[#1565C0] bg-[#E3F2FD] hover:bg-cool-2"
+            className="h-12 border-[#B0BEC5] text-[#263238] dark:text-white dark:border-[#455A64] hover:bg-[#F7F7F7] dark:hover:bg-[#263238]"
           >
-            Sign in with{""}
-            <FcGoogle className="h-5 w-5" />
-          </button>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continue with Google
+          </Button>
         </div>
       </div>
     </section>

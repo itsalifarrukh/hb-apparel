@@ -64,7 +64,24 @@ export async function POST(request: NextRequest) {
       where: {
         email: email,
       },
+      include: {
+        accounts: true,
+      },
     });
+
+    // Check if user exists with social login only
+    if (existingUserByEmail && existingUserByEmail.isEmailVerified && existingUserByEmail.accounts.length > 0) {
+      const socialProviders = existingUserByEmail.accounts.map(account => account.provider).join(', ');
+      return NextResponse.json(
+        {
+          success: false,
+          message: `You already have an account registered with ${socialProviders}. Please sign in using ${socialProviders} instead.`,
+          socialProviders: existingUserByEmail.accounts.map(account => account.provider),
+          redirectToSignIn: true
+        },
+        { status: 409 }
+      );
+    }
 
     const { unHashedCode, hashedCode, expiry } = generateVerificationCode();
     let responseMessage = "";

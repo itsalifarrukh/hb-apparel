@@ -67,14 +67,14 @@ export default function VerifyAccount() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-800">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <section className="relative flex justify-center items-center min-h-screen py-20 bg-[#F7F7F7] dark:bg-[#263238]">
+      <div className="relative w-full max-w-md p-8 space-y-8 rounded-lg bg-white dark:bg-[#455A64] backdrop-blur-xl shadow-lg ring-1 ring-[#B0BEC5]/30 dark:ring-[#263238]/30">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl mb-4 text-gray-800">
+          <h1 className="text-3xl sm:text-4xl font-light tracking-tight mb-6 text-[#263238] dark:text-white">
             Verify Your Account
           </h1>
-          <p className="text-sm text-gray-500 mb-6">
-            Enter the 6-digit verification code sent to your email
+          <p className="text-[#455A64] dark:text-[#B0BEC5] mb-6">
+            Enter the 6-digit verification code sent to your email address
           </p>
         </div>
         <Form {...form}>
@@ -84,7 +84,7 @@ export default function VerifyAccount() {
               control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-col items-center">
-                  <FormLabel className="mb-4 text-gray-600">
+                  <FormLabel className="mb-4 text-[#263238] dark:text-white font-medium">
                     Verification Code
                   </FormLabel>
                   <InputOTP
@@ -93,33 +93,33 @@ export default function VerifyAccount() {
                     onChange={(value) => field.onChange(value)}
                     className="flex gap-8 justify-center"
                   >
-                    <InputOTPGroup className="gap-4">
+                    <InputOTPGroup className="gap-2">
                       <InputOTPSlot
                         index={0}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                       <InputOTPSlot
                         index={1}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                       <InputOTPSlot
                         index={2}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                     </InputOTPGroup>
-                    <InputOTPSeparator>-</InputOTPSeparator>
-                    <InputOTPGroup className="gap-4">
+                    <InputOTPSeparator className="text-[#455A64] dark:text-[#B0BEC5]">-</InputOTPSeparator>
+                    <InputOTPGroup className="gap-2">
                       <InputOTPSlot
                         index={3}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                       <InputOTPSlot
                         index={4}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                       <InputOTPSlot
                         index={5}
-                        className="h-12 w-12 text-center text-lg border rounded-md shadow-sm"
+                        className="h-14 w-14 text-center text-xl border-[#B0BEC5] dark:border-[#455A64] bg-white dark:bg-[#263238] text-[#263238] dark:text-white rounded-lg font-semibold focus:border-[#263238] dark:focus:border-white"
                       />
                     </InputOTPGroup>
                   </InputOTP>
@@ -127,22 +127,25 @@ export default function VerifyAccount() {
                 </FormItem>
               )}
             />
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-8">
               <Button
                 type="submit"
-                className="w-full py-2 text-lg font-medium"
+                className="w-full h-12 text-base font-medium bg-[#263238] text-white hover:bg-[#455A64] dark:bg-white dark:text-[#263238] dark:hover:bg-[#F7F7F7]"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
                 ) : (
-                  "Verify"
+                  "Verify Account"
                 )}
               </Button>
             </div>
           </form>
         </Form>
       </div>
-    </div>
+    </section>
   );
 }
