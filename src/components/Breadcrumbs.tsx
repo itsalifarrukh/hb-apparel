@@ -1,5 +1,5 @@
 "use client";
-import { usePathname } from "next/navigation";
+
 import Link from "next/link";
 import React from "react";
 
@@ -12,42 +12,32 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export default function Breadcrumbs() {
-  const pathname = usePathname(); // Get the current path
+interface BreadcrumbItemType {
+  label: string;
+  href: string;
+}
 
-  // Split the current path into parts
-  const pathSegments = pathname.split("/").filter((segment) => segment);
+interface BreadcrumbsProps {
+  items: BreadcrumbItemType[];
+}
 
-  // Construct breadcrumb items from path segments
-  const breadcrumbItems = pathSegments.map((segment, index) => {
-    const href = "/" + pathSegments.slice(0, index + 1).join("/");
-
-    // Capitalize the segment for display
-    const title = segment.charAt(0).toUpperCase() + segment.slice(1);
-
-    return { href, title };
-  });
+const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
+  if (!items || items.length === 0) {
+    return null;
+  }
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {/* Home link */}
-        <BreadcrumbItem>
-          <BreadcrumbLink>
-            <Link href="/">Home</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-
-        {/* Dynamic breadcrumbs */}
-        {breadcrumbItems.map((item, index) => (
+        {items.map((item, index) => (
           <React.Fragment key={item.href}>
-            <BreadcrumbSeparator />
+            {index > 0 && <BreadcrumbSeparator />}
             <BreadcrumbItem>
-              {index === breadcrumbItems.length - 1 ? (
-                <BreadcrumbPage>{item.title}</BreadcrumbPage>
+              {index === items.length - 1 ? (
+                <BreadcrumbPage>{item.label}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink>
-                  <Link href={item.href}>{item.title}</Link>
+                <BreadcrumbLink asChild>
+                  <Link href={item.href}>{item.label}</Link>
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
@@ -56,4 +46,6 @@ export default function Breadcrumbs() {
       </BreadcrumbList>
     </Breadcrumb>
   );
-}
+};
+
+export default Breadcrumbs;
