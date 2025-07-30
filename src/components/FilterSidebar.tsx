@@ -90,7 +90,7 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
       page: 1,
       limit: 12,
       sortBy: "popularity",
-      sortOrder: "desc" as "desc",
+      sortOrder: "desc" as const,
     };
     onFiltersChange(defaultFilters);
   };
