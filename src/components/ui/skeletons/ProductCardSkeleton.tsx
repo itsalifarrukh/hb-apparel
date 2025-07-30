@@ -7,27 +7,27 @@ export function ProductCardSkeleton() {
       <div className="relative aspect-square">
         <Skeleton className="w-full h-full rounded-t-lg" />
       </div>
-      
+
       {/* Content skeleton */}
       <div className="p-4 space-y-3">
         {/* Product name */}
         <Skeleton className="h-5 w-3/4" />
-        
+
         {/* Category */}
         <Skeleton className="h-4 w-1/2" />
-        
+
         {/* Price */}
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-20" />
           <Skeleton className="h-4 w-16" />
         </div>
-        
+
         {/* Rating */}
         <div className="flex items-center gap-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-12" />
         </div>
-        
+
         {/* Buttons */}
         <div className="flex gap-2 pt-2">
           <Skeleton className="h-9 flex-1" />
