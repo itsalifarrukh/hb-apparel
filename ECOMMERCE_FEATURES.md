@@ -30,8 +30,11 @@ DELETE /api/categories/[id]      - Delete category
 
 ##### Subcategories API (`/api/subcategories`)
 ```
-GET    /api/subcategories        - List subcategories (filter by categoryId)
-POST   /api/subcategories        - Create new subcategory
+GET    /api/subcategories           - List subcategories (filter by categoryId)
+POST   /api/subcategories           - Create new subcategory
+GET    /api/subcategories/[id]      - Get specific subcategory
+PUT    /api/subcategories/[id]      - Update subcategory
+DELETE /api/subcategories/[id]      - Delete subcategory
 ```
 
 ##### Products API (`/api/products`)
@@ -46,12 +49,18 @@ Supported Query Parameters:
 - minPrice, maxPrice (price range)
 - inStock, featured, newArrivals, onSale (boolean filters)
 - sortBy, sortOrder (sorting)
+GET    /api/products/[id]       - Get specific product
+PUT    /api/products/[id]       - Update product
+DELETE /api/products/[id]       - Delete product
 ```
 
 ##### Deals API (`/api/deals`)
 ```
 GET    /api/deals                - List deals (active, upcoming, expired)
 POST   /api/deals                - Create new deal with products
+GET    /api/deals/[id]           - Get specific deal
+PUT    /api/deals/[id]           - Update deal
+DELETE /api/deals/[id]           - Delete deal
 ```
 
 #### 3. Advanced Features Implemented
