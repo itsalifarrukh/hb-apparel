@@ -6,6 +6,7 @@ import {
   Category,
   Deal,
   Subcategory,
+  Review,
 } from "@/types/frontend";
 
 const api = axios.create({
@@ -98,7 +99,9 @@ export const productsApi = {
   },
 
   // Get related products
-  getRelatedProducts: async (productId: string): Promise<ApiResponse<Product[]>> => {
+  getRelatedProducts: async (
+    productId: string
+  ): Promise<ApiResponse<Product[]>> => {
     const response = await api.get(`/products/${productId}/related`);
     return response.data;
   },
@@ -165,7 +168,9 @@ export const dealsApi = {
 
 // Reviews API
 export const reviewsApi = {
-  getReviewsByProduct: async (productId: string): Promise<ApiResponse<Review[]>> => {
+  getReviewsByProduct: async (
+    productId: string
+  ): Promise<ApiResponse<Review[]>> => {
     const response = await api.get(`/reviews?productId=${productId}`);
     return response.data;
   },

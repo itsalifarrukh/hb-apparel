@@ -32,18 +32,29 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
     setLocalFilters(filters);
   }, [filters]);
 
-  const handleChange = (key: string, value: string | number | boolean | undefined) => {
+  const handleChange = (
+    key: string,
+    value: string | number | boolean | undefined
+  ) => {
     setLocalFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleDebouncedChange = (key: string, value: string | number | boolean | undefined) => {
+  const handleDebouncedChange = (
+    key: string,
+    value: string | number | boolean | undefined
+  ) => {
     // Apply filter changes immediately for checkboxes and radio buttons
-    if (key === 'inStock' || key === 'featured' || key === 'categoryId' || key === 'subcategoryId') {
+    if (
+      key === "inStock" ||
+      key === "featured" ||
+      key === "categoryId" ||
+      key === "subcategoryId"
+    ) {
       // For category/subcategory selection, clear the other when one is selected
       const updatedFilters = { ...filters, [key]: value };
-      if (key === 'categoryId') {
+      if (key === "categoryId") {
         updatedFilters.subcategoryId = undefined;
-      } else if (key === 'subcategoryId') {
+      } else if (key === "subcategoryId") {
         updatedFilters.categoryId = undefined;
       }
       onFiltersChange(updatedFilters);
@@ -55,15 +66,22 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
 
   const handleCheckboxChange = (key: string, currentValue: string) => {
     // Toggle checkbox behavior - if already selected, uncheck it
-    const newValue = currentValue === filters[key as keyof typeof filters] ? undefined : currentValue;
+    const newValue =
+      currentValue === filters[key as keyof typeof filters]
+        ? undefined
+        : currentValue;
     handleDebouncedChange(key, newValue);
   };
 
   const handlePriceChange = () => {
     onFiltersChange({
       ...filters,
-      minPrice: localFilters.minPrice ? parseFloat(localFilters.minPrice as string) : undefined,
-      maxPrice: localFilters.maxPrice ? parseFloat(localFilters.maxPrice as string) : undefined,
+      minPrice: localFilters.minPrice
+        ? parseFloat(String(localFilters.minPrice))
+        : undefined,
+      maxPrice: localFilters.maxPrice
+        ? parseFloat(String(localFilters.maxPrice))
+        : undefined,
     });
   };
 
@@ -71,8 +89,8 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
     const defaultFilters = {
       page: 1,
       limit: 12,
-      sortBy: 'popularity',
-      sortOrder: 'desc',
+      sortBy: "popularity",
+      sortOrder: "desc" as "desc",
     };
     onFiltersChange(defaultFilters);
   };
@@ -96,14 +114,14 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                 <div className="flex gap-2">
                   <Input
                     type="number"
-                    value={localFilters.minPrice || ''}
+                    value={localFilters.minPrice || ""}
                     onChange={(e) => handleChange("minPrice", e.target.value)}
                     placeholder="Min"
                     disabled={isLoading}
                   />
                   <Input
                     type="number"
-                    value={localFilters.maxPrice || ''}
+                    value={localFilters.maxPrice || ""}
                     onChange={(e) => handleChange("maxPrice", e.target.value)}
                     placeholder="Max"
                     disabled={isLoading}
@@ -142,7 +160,9 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                       <Checkbox
                         id={`category-${category.id}`}
                         checked={filters.categoryId === category.id}
-                        onCheckedChange={() => handleCheckboxChange("categoryId", category.id)}
+                        onCheckedChange={() =>
+                          handleCheckboxChange("categoryId", category.id)
+                        }
                         disabled={isLoading}
                       />
                       <label
@@ -150,7 +170,9 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex justify-between items-center w-full cursor-pointer"
                       >
                         <span>{category.name}</span>
-                        <Badge variant="secondary">{category._count.products}</Badge>
+                        <Badge variant="secondary">
+                          {category._count.products}
+                        </Badge>
                       </label>
                     </div>
                   ))
@@ -176,11 +198,16 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                   </div>
                 ) : (
                   subcategories.map((subcategory) => (
-                    <div key={subcategory.id} className="flex items-center gap-2">
+                    <div
+                      key={subcategory.id}
+                      className="flex items-center gap-2"
+                    >
                       <Checkbox
                         id={`subcategory-${subcategory.id}`}
                         checked={filters.subcategoryId === subcategory.id}
-                        onCheckedChange={() => handleCheckboxChange("subcategoryId", subcategory.id)}
+                        onCheckedChange={() =>
+                          handleCheckboxChange("subcategoryId", subcategory.id)
+                        }
                         disabled={isLoading}
                       />
                       <label
@@ -188,7 +215,9 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex justify-between items-center w-full cursor-pointer"
                       >
                         <span>{subcategory.name}</span>
-                        <Badge variant="secondary">{subcategory._count.products}</Badge>
+                        <Badge variant="secondary">
+                          {subcategory._count.products}
+                        </Badge>
                       </label>
                     </div>
                   ))
@@ -211,7 +240,8 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
                     id="in-stock"
                     checked={filters.inStock === true}
                     onCheckedChange={() => {
-                      const newValue = filters.inStock === true ? undefined : true;
+                      const newValue =
+                        filters.inStock === true ? undefined : true;
                       handleDebouncedChange("inStock", newValue);
                     }}
                     disabled={isLoading}
@@ -234,7 +264,7 @@ const FilterSidebar: React.FC<ExtendedFilterSidebarProps> = ({
           disabled={isLoading}
           className="w-full text-red-500 hover:text-red-700"
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}        
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Clear Filters
         </Button>
       </div>
