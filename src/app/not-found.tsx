@@ -8,7 +8,12 @@ export default function NotFound() {
       {/* Breadcrumbs */}
       <div className="p-4 mt-10">
         <div className="flex justify-between items-center ml-10 mb-4">
-          <Breadcrumbs />
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Not Found", href: "/not-found" },
+            ]}
+          />
         </div>
       </div>
 
