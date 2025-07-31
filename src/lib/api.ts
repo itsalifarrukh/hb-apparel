@@ -70,7 +70,7 @@ export const productsApi = {
 
   // Get single product by ID or slug
   getProduct: async (idOrSlug: string): Promise<ApiResponse<Product>> => {
-    const response = await api.get(`/products/${idOrSlug}`);
+    const response = await api.get(`/products/details/${idOrSlug}`);
     return response.data;
   },
 
