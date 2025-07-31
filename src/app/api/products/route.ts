@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { generateSlug } from "@/utils/slug";
 
 type ProductWithIncludes = Prisma.ProductGetPayload<{
   include: {
@@ -24,6 +25,7 @@ type ProductWithIncludes = Prisma.ProductGetPayload<{
 
 type ProductCreateInput = {
   name: string;
+  slug?: string;
   categoryId?: string;
   subcategoryId?: string;
   mainImage: string;
@@ -217,6 +219,7 @@ export async function POST(request: NextRequest) {
     const body: ProductCreateInput = await request.json();
     const {
       name,
+      slug,
       categoryId,
       subcategoryId,
       mainImage,
@@ -247,8 +250,12 @@ export async function POST(request: NextRequest) {
     const discountAmount = discount ? (price * discount) / 100 : 0;
     const discountedPrice = price - discountAmount;
 
+    // Generate slug if not provided
+    const productSlug = slug || generateSlug(name);
+
     const productData: Prisma.ProductCreateInput = {
       name,
+      slug: productSlug,
       mainImage,
       description,
       price,

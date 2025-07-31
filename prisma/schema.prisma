@@ -147,6 +147,7 @@ model Review {
 
 model Product {
   id                 String    @id @default(uuid())
+  slug               String    @unique
   name               String
   categoryId         String?
   subcategoryId      String?

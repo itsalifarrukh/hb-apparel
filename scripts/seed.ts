@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { generateSlug } from '../src/utils/slug';
 
 const prisma = new PrismaClient();
 
@@ -112,6 +113,7 @@ async function main() {
   const sampleProducts = [
     {
       name: 'Classic Blue Denim Shirt',
+      slug: generateSlug('Classic Blue Denim Shirt'),
       categoryId: menCategory.id,
       subcategoryId: menShirts.id,
       mainImage: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500',
@@ -132,6 +134,7 @@ async function main() {
     },
     {
       name: 'Elegant Black Evening Dress',
+      slug: generateSlug('Elegant Black Evening Dress'),
       categoryId: womenCategory.id,
       subcategoryId: womenDresses.id,
       mainImage: 'https://images.unsplash.com/photo-1566479179817-c9d67e2b5d0c?w=500',
@@ -151,6 +154,7 @@ async function main() {
     },
     {
       name: 'Comfortable Cotton T-Shirt',
+      slug: generateSlug('Comfortable Cotton T-Shirt'),
       categoryId: kidsCategory.id,
       subcategoryId: kidsShirts.id,
       mainImage: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500',
@@ -170,6 +174,7 @@ async function main() {
     },
     {
       name: 'Premium Leather Jacket',
+      slug: generateSlug('Premium Leather Jacket'),
       categoryId: menCategory.id,
       subcategoryId: menAccessories.id,
       mainImage: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500',
@@ -189,6 +194,7 @@ async function main() {
     },
     {
       name: 'Casual Summer Top',
+      slug: generateSlug('Casual Summer Top'),
       categoryId: womenCategory.id,
       subcategoryId: womenTops.id,
       mainImage: 'https://images.unsplash.com/photo-1582142306909-195724d33c05?w=500',
