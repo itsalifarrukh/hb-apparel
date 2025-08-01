@@ -19,8 +19,23 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Type definitions
+interface Address {
+  id: string;
+  title: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
+  type: "home" | "work" | "other";
+}
+
 // Mock data - replace with real data from your API
-const mockAddresses = [
+const mockAddresses: Address[] = [
   {
     id: "1",
     title: "Home",
@@ -32,7 +47,7 @@ const mockAddresses = [
     country: "United States",
     phone: "+1 (555) 123-4567",
     isDefault: true,
-    type: "home" as const,
+    type: "home",
   },
   {
     id: "2",
@@ -45,9 +60,9 @@ const mockAddresses = [
     country: "United States",
     phone: "+1 (555) 987-6543",
     isDefault: false,
-    type: "work" as const,
+    type: "work",
   },
-] as const;
+];
 
 const initialFormData = {
   title: "",
@@ -62,7 +77,7 @@ const initialFormData = {
 };
 
 export function AddressBookComponent() {
-  const [addresses, setAddresses] = useState(mockAddresses);
+  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
@@ -71,7 +86,7 @@ export function AddressBookComponent() {
   const handleSave = () => {
     if (editingAddress) {
       // Update existing address
-      setAddresses(prev => prev.map(addr => 
+      setAddresses(prev => prev.map((addr) => 
         addr.id === editingAddress 
           ? { ...addr, ...formData, id: addr.id, isDefault: addr.isDefault }
           : addr
@@ -86,7 +101,7 @@ export function AddressBookComponent() {
         ...formData,
         id: Date.now().toString(),
         isDefault: addresses.length === 0,
-      };
+      } as Address;
       setAddresses(prev => [...prev, newAddress]);
       toast({
         title: "Address Added",
@@ -99,7 +114,7 @@ export function AddressBookComponent() {
     setFormData(initialFormData);
   };
 
-  const handleEdit = (address: typeof mockAddresses[number]) => {
+  const handleEdit = (address: Address) => {
     setFormData({
       title: address.title,
       name: address.name,
@@ -109,7 +124,7 @@ export function AddressBookComponent() {
       zipCode: address.zipCode,
       country: address.country,
       phone: address.phone,
-      type: address.type as "home" | "work" | "other",
+      type: address.type,
     });
     setEditingAddress(address.id);
     setIsDialogOpen(true);

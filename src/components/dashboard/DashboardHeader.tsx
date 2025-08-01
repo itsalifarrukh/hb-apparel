@@ -39,7 +39,7 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
       {/* Breadcrumb or page title could go here */}
       <div className="flex-1">
         <h1 className="text-xl font-semibold text-foreground">
-          Welcome back, {session?.user?.firstName || 'User'}!
+          Welcome back, {session?.user?.name || 'User'}!
         </h1>
       </div>
 
@@ -75,12 +75,11 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
                 <AvatarImage 
-                  src={session?.user?.avatarUrl || "/DefaultAvatar.png"} 
-                  alt={session?.user?.firstName || "User"} 
+                  src={session?.user?.image || "/DefaultAvatar.png"} 
+                  alt={session?.user?.name || "User"} 
                 />
                 <AvatarFallback>
-                  {session?.user?.firstName?.[0] || 'U'}
-                  {session?.user?.lastName?.[0] || ''}
+                  {session?.user?.name?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -89,7 +88,7 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  {session?.user?.firstName} {session?.user?.lastName}
+                  {session?.user?.name}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {session?.user?.email}

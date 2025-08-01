@@ -95,17 +95,19 @@ export function CartComponent() {
                     <div className="flex items-center justify-center space-x-2">
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         onClick={() => handleChangeQuantity(item.id, -1)}
                         disabled={item.quantity <= 1}
+                        className="h-6 w-6 p-0"
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
                       <span>{item.quantity}</span>
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         onClick={() => handleChangeQuantity(item.id, 1)}
+                        className="h-6 w-6 p-0"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
