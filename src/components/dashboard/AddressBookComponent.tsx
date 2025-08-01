@@ -32,7 +32,7 @@ const mockAddresses = [
     country: "United States",
     phone: "+1 (555) 123-4567",
     isDefault: true,
-    type: "home",
+    type: "home" as const,
   },
   {
     id: "2",
@@ -45,9 +45,9 @@ const mockAddresses = [
     country: "United States",
     phone: "+1 (555) 987-6543",
     isDefault: false,
-    type: "work",
+    type: "work" as const,
   },
-];
+] as const;
 
 const initialFormData = {
   title: "",
@@ -99,7 +99,7 @@ export function AddressBookComponent() {
     setFormData(initialFormData);
   };
 
-  const handleEdit = (address: typeof mockAddresses[0]) => {
+  const handleEdit = (address: typeof mockAddresses[number]) => {
     setFormData({
       title: address.title,
       name: address.name,
@@ -109,7 +109,7 @@ export function AddressBookComponent() {
       zipCode: address.zipCode,
       country: address.country,
       phone: address.phone,
-      type: address.type,
+      type: address.type as "home" | "work" | "other",
     });
     setEditingAddress(address.id);
     setIsDialogOpen(true);
