@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return createUnauthorizedResponse();
     }
+    
+    console.log("User ID from token:", user.id);
 
     // Find or create wishlist for user
     let wishlist = await prisma.wishlist.findFirst({

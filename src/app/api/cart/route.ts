@@ -28,6 +28,8 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return createUnauthorizedResponse();
     }
+    
+    console.log("User ID from token:", user.id);
 
     // Find or create cart for user
     let cart = await prisma.cart.findFirst({

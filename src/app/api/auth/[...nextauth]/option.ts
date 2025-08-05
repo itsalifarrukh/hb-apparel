@@ -156,12 +156,15 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    async session({ session }) {
+    async session({ session, token }) {
       if (session.user) {
+        // Use the ID from the JWT token
+        session.user.id = token.id as string;
+        
+        // Retrieve other user details from the database
         const user = await prisma.user.findUnique({
-          where: { email: session.user.email! },
+          where: { id: token.id as string },
           select: {
-            id: true,
             username: true,
             role: true,
             isEmailVerified: true,
@@ -169,7 +172,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (user) {
-          session.user.id = user.id;
           session.user.username = user.username ?? undefined;
           session.user.role = user.role;
           session.user.isEmailVerified = user.isEmailVerified;
@@ -177,10 +179,27 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        // For OAuth providers, we need to look up the actual database user ID
+        if (account && account.provider !== 'credentials') {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { email: user.email! },
+              select: { id: true, role: true }
+            });
+            if (dbUser) {
+              token.id = dbUser.id;
+              token.role = dbUser.role;
+            }
+          } catch (error) {
+            console.error('Error looking up user in JWT callback:', error);
+          }
+        } else {
+          // For credentials provider, user.id is already the database ID
+          token.id = user.id;
+          token.role = user.role;
+        }
       }
       return token;
     },

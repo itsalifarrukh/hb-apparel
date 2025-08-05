@@ -62,6 +62,15 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
   id                     String    @id @default(uuid())
   avatarUrl              String    @default("/DefaultAvatar.png")
@@ -80,6 +89,7 @@ model User {
   updatedAt              DateTime  @updatedAt
 
   accounts Account[]
+  sessions Session[]
   reviews  Review[]
   carts    Cart[]
   orders   Order[]
