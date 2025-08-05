@@ -167,3 +167,73 @@ export interface ExtendedProductGridProps extends ProductGridProps {
 export interface ExtendedProductCardProps extends ProductCardProps {
   viewMode?: 'grid' | 'list';
 }
+
+// Cart and Wishlist types
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    discount: number;
+    discountedPrice: number;
+    mainImage: string;
+    stock: number;
+    availabilityStatus: string;
+    activeDeal?: Deal | null;
+    dealPrice?: number | null;
+  };
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  totalItems: number;
+  totalPrice: number;
+  totalDiscountedPrice: number;
+}
+
+export interface WishlistItem {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  discount: number;
+  discountedPrice: number;
+  mainImage: string;
+  stock: number;
+  availabilityStatus: string;
+  activeDeal?: Deal | null;
+  dealPrice?: number | null;
+}
+
+export interface Wishlist {
+  id: string;
+  userId: string;
+  products: WishlistItem[];
+  totalItems: number;
+}
+
+// Request/Response types for API
+export interface AddToCartRequest {
+  productId: string;
+  quantity?: number;
+}
+
+export interface UpdateCartItemRequest {
+  quantity: number;
+}
+
+export interface AddToWishlistRequest {
+  productId: string;
+}
+
+export interface MoveAllToCartRequest {
+  // No body needed, just moves all wishlist items to cart
+  [key: string]: never;
+}

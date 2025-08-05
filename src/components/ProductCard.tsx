@@ -1,13 +1,19 @@
 "use client";
 
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Star, Package } from "lucide-react";
+import { ShoppingCart, Star, Package, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCardProps } from "@/types/frontend";
 import { cn } from "@/lib/utils";
 import { generateUniqueSlug } from "@/utils/slug";
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
+import { addToWishlist } from "@/lib/api/wishlist";
+import { addToCart } from "@/lib/api/cart";
 
 interface ExtendedProductCardProps extends ProductCardProps {
   viewMode?: "grid" | "list";
@@ -18,11 +24,86 @@ const ProductCard: React.FC<ExtendedProductCardProps> = ({
   onAddToCart,
   viewMode = "grid",
 }) => {
+  const { data: session } = useSession();
+  const { toast } = useToast();
+  const [, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    onAddToCart?.(product.id);
+    
+    if (!session) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your cart",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (onAddToCart) {
+      onAddToCart(product.id);
+      return;
+    }
+    
+    setIsAddingToCart(true);
+    try {
+      const response = await addToCart({ productId: product.id, quantity: 1 });
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Item added to cart",
+        });
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+  
+  const handleAddToWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (!session) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your wishlist",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsAddingToWishlist(true);
+    try {
+      const response = await addToWishlist({ productId: product.id });
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Item added to wishlist",
+        });
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      console.error("Failed to add to wishlist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to wishlist",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingToWishlist(false);
+    }
   };
 
   const productSlug =
@@ -39,10 +120,25 @@ const ProductCard: React.FC<ExtendedProductCardProps> = ({
         style={{ perspective: "1000px" }}
       >
         {product.activeDeal && (
-          <div className="badge absolute top-3 right-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 text-xs font-bold uppercase rounded-full shadow-md z-10">
+          <div className="badge absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 text-xs font-bold uppercase rounded-full shadow-md z-10">
             {product.activeDeal.name}
           </div>
         )}
+        
+        {/* Wishlist Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-3 right-3 z-10 h-8 w-8 p-0 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 shadow-sm"
+          onClick={handleAddToWishlist}
+          disabled={isAddingToWishlist}
+        >
+          {isAddingToWishlist ? (
+            <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Heart className="h-4 w-4 text-red-500 hover:fill-current transition-colors" />
+          )}
+        </Button>
 
         <div
           className={cn(
