@@ -1,38 +1,26 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Badge } from "../ui/badge";
-import { fetchCart } from "@/lib/api/cart";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loadCart, clearCart } from "@/store/cartSlice";
 import Link from "next/link";
 
 function Cart() {
   const { data: session } = useSession();
-  const [itemCount, setItemCount] = useState(0);
-  const [, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { cart } = useAppSelector((state) => state.cart);
+  const itemCount = cart?.totalItems || 0;
 
   useEffect(() => {
     if (session) {
-      loadCartCount();
+      dispatch(loadCart());
     } else {
-      setItemCount(0);
+      dispatch(clearCart());
     }
-  }, [session]);
-
-  const loadCartCount = async () => {
-    setLoading(true);
-    try {
-      const response = await fetchCart();
-      if (response.success) {
-        setItemCount(response.data.totalItems);
-      }
-    } catch (error) {
-      console.error("Failed to load cart count:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [session, dispatch]);
 
   return (
     <Link href="/cart" className="block">

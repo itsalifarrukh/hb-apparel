@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ReduxProvider } from "@/store/provider";
 import ClientLayout from "@/components/layout/ClientLayout";
 
 const geistSans = localFont({
@@ -50,17 +51,19 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased site-bg">
-        <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ClientLayout>{children}</ClientLayout>
-          </ThemeProvider>
-          <Toaster />
-        </AuthProvider>
+        <ReduxProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <ClientLayout>{children}</ClientLayout>
+            </ThemeProvider>
+            <Toaster />
+          </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,38 +1,26 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Badge } from "../ui/badge";
-import { fetchWishlist } from "@/lib/api/wishlist";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { loadWishlist, clearWishlist } from "@/store/wishlistSlice";
 import Link from "next/link";
 
 function Wishlist() {
   const { data: session } = useSession();
-  const [itemCount, setItemCount] = useState(0);
-  const [, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { wishlist } = useAppSelector((state) => state.wishlist);
+  const itemCount = wishlist?.totalItems || 0;
 
   useEffect(() => {
     if (session) {
-      loadWishlistCount();
+      dispatch(loadWishlist());
     } else {
-      setItemCount(0);
+      dispatch(clearWishlist());
     }
-  }, [session]);
-
-  const loadWishlistCount = async () => {
-    setLoading(true);
-    try {
-      const response = await fetchWishlist();
-      if (response.success) {
-        setItemCount(response.data.totalItems);
-      }
-    } catch (error) {
-      console.error("Failed to load wishlist count:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [session, dispatch]);
 
   return (
     <Link href="/wishlist" className="block">
