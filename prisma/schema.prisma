@@ -88,12 +88,14 @@ model User {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  reviews  Review[]
-  carts    Cart[]
-  orders   Order[]
-  wishlist Wishlist[]
+  accounts         Account[]
+  sessions         Session[]
+  reviews          Review[]
+  carts            Cart[]
+  orders           Order[]
+  wishlist         Wishlist[]
+  addresses        Address[]
+  paymentMethods   PaymentMethod[]
 
   @@index([username])
 }
@@ -116,13 +118,49 @@ model CartItem {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     OrderItem[]
-  total     Float
-  status    String
-  createdAt DateTime    @default(now())
+  id                String       @id @default(uuid())
+  userId            String
+  orderNumber       String       @unique
+  status            OrderStatus  @default(PENDING)
+  paymentStatus     PaymentStatus @default(PENDING)
+  shippingStatus    ShippingStatus @default(NOT_SHIPPED)
+  
+  // Order amounts
+  subtotal          Float
+  shippingCost      Float        @default(0)
+  taxAmount         Float        @default(0)
+  discountAmount    Float        @default(0)
+  totalAmount       Float
+  
+  // Shipping information
+  shippingAddressId String?
+  billingAddressId  String?
+  
+  // Payment information
+  paymentMethodId   String?
+  stripePaymentIntentId String?
+  
+  // Order notes and tracking
+  customerNotes     String?
+  adminNotes        String?
+  trackingNumber    String?
+  
+  // Timestamps
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  
+  // Relations
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items             OrderItem[]
+  shippingAddress   Address?     @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress    Address?     @relation("OrderBillingAddress", fields: [billingAddressId], references: [id])
+  paymentMethod     PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
 }
 
 model OrderItem {
@@ -130,6 +168,14 @@ model OrderItem {
   orderId   String
   productId String
   quantity  Int    @default(1)
+  price     Float  // Price at time of purchase
+  discount  Float  @default(0) // Discount applied at time of purchase
+  
+  // Product details at time of purchase (for historical record)
+  productName       String
+  productImage      String
+  productSize       String?
+  productColor      String?
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -186,7 +232,108 @@ model Product {
   wishlistedBy Wishlist[]    @relation("WishlistProducts")
 }
 
+// Address model for shipping and billing addresses
+model Address {
+  id           String    @id @default(uuid())
+  userId       String
+  type         AddressType @default(BOTH)
+  isDefault    Boolean   @default(false)
+  
+  // Address fields
+  fullName     String
+  company      String?
+  streetLine1  String
+  streetLine2  String?
+  city         String
+  state        String
+  zipCode      String
+  country      String    @default("United States")
+  phoneNumber  String?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relations
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders      Order[] @relation("OrderShippingAddress")
+  billingOrders       Order[] @relation("OrderBillingAddress")
+  
+  @@index([userId])
+}
+
+// Payment methods for users (for saved cards, etc.)
+model PaymentMethod {
+  id                String           @id @default(uuid())
+  userId            String
+  type              PaymentMethodType @default(CREDIT_CARD)
+  isDefault         Boolean          @default(false)
+  
+  // Card information (encrypted/tokenized)
+  stripePaymentMethodId String?     // Stripe payment method ID
+  last4             String?         // Last 4 digits for display
+  brand             String?         // visa, mastercard, etc.
+  expiryMonth       Int?
+  expiryYear        Int?
+  
+  // Billing information
+  billingName       String
+  billingEmail      String?
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  // Relations
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders            Order[]
+  
+  @@index([userId])
+}
+
 enum Role {
   USER
   ADMIN
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+  BOTH
+}
+
+enum PaymentMethodType {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  STRIPE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum ShippingStatus {
+  NOT_SHIPPED
+  PREPARING
+  SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELIVERY_FAILED
+  RETURNED
 }

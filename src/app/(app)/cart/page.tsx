@@ -13,12 +13,7 @@ import {
 } from "@/store/cartSlice";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ShoppingBag,
-  Package,
-  CreditCard,
-  Trash2,
-} from "lucide-react";
+import { ShoppingBag, Package, CreditCard, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -389,6 +384,7 @@ function Cart() {
                   <Button
                     className="w-full hover:bg-[#455A64] dark:hover:bg-[#f2fbff]"
                     size="lg"
+                    onClick={() => router.push("/checkout")}
                   >
                     <CreditCard className="w-4 h-4 mr-2" />
                     Proceed to Checkout

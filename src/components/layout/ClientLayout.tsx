@@ -10,14 +10,15 @@ interface ClientLayoutProps {
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/dashboard');
+  const isDashboard = pathname?.startsWith("/dashboard");
+  const isCheckout = pathname?.startsWith("/checkout");
 
   if (isDashboard) {
-    return (
-      <div className="min-h-screen">
-        {children}
-      </div>
-    );
+    return <div className="min-h-screen">{children}</div>;
+  }
+
+  if (isCheckout) {
+    return <div className="min-h-screen">{children}</div>;
   }
 
   return (
