@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
 // Mock data - replace with real data from your API
 const mockCartItems = [
@@ -41,15 +42,18 @@ export function CartComponent() {
     });
   };
 
-  const handleChangeQuantity = (id: string, delta: number) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: item.quantity + delta }
-          : item
-      )
-    );
-  };
+  const handleChangeQuantity = useDebouncedCallback(
+    (id: string, delta: number) => {
+      setCartItems((items) =>
+        items.map((item) =>
+          item.id === id
+            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+            : item
+        )
+      );
+    },
+    300 // 300ms debounce delay
+  );
 
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,

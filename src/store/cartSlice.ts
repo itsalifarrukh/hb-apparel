@@ -27,7 +27,7 @@ export const loadCart = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to load cart');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to load cart. Please try again.');
     }
   }
@@ -43,7 +43,7 @@ export const removeFromCart = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to remove item');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to remove item from cart');
     }
   }
@@ -59,7 +59,7 @@ export const updateQuantity = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to update quantity');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to update quantity');
     }
   }

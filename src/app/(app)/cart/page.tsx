@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ShoppingBag,
-  ArrowLeft,
   Package,
   CreditCard,
   Trash2,
@@ -23,6 +22,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
@@ -63,24 +63,27 @@ function Cart() {
     });
   };
 
-  const handleQuantityChange = (itemId: string, quantity: number) => {
-    if (quantity < 1) return;
+  const handleQuantityChange = useDebouncedCallback(
+    (itemId: string, quantity: number) => {
+      if (quantity < 1) return;
 
-    dispatch(updateQuantity({ itemId, quantity })).then((result) => {
-      if (result.meta.requestStatus === "fulfilled") {
-        toast({
-          title: "Success",
-          description: "Cart updated",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to update quantity",
-          variant: "destructive",
-        });
-      }
-    });
-  };
+      dispatch(updateQuantity({ itemId, quantity })).then((result) => {
+        if (result.meta.requestStatus === "fulfilled") {
+          toast({
+            title: "Success",
+            description: "Cart updated",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to update quantity",
+            variant: "destructive",
+          });
+        }
+      });
+    },
+    500 // 500ms debounce delay
+  );
 
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
 
@@ -113,11 +116,11 @@ function Cart() {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Sign In Required
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-muted-foreground mb-8">
             Please sign in to view your shopping cart.
           </p>
           <Button onClick={() => router.push("/auth/signin")} className="mr-4">
@@ -150,11 +153,11 @@ function Cart() {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Your Cart is Empty
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-muted-foreground mb-8">
             Looks like you haven&apos;t added anything to your cart yet.
           </p>
           <Button onClick={() => router.push("/products")}>
@@ -168,7 +171,7 @@ function Cart() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-8">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -248,12 +251,12 @@ function Cart() {
                         <div className="mb-4">
                           {item.product.dealPrice ? (
                             <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                              <span className="text-lg font-bold text-foreground">
                                 {formatPrice(
                                   item.product.dealPrice * item.quantity
                                 )}
                               </span>
-                              <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                              <span className="text-sm text-muted-foreground line-through">
                                 {formatPrice(
                                   item.product.price * item.quantity
                                 )}
@@ -268,7 +271,7 @@ function Cart() {
                               </Badge>
                             </div>
                           ) : (
-                            <span className="text-lg font-bold text-gray-900 dark:text-white">
+                            <span className="text-lg font-bold text-foreground">
                               {formatPrice(
                                 item.product.discountedPrice * item.quantity
                               )}
@@ -279,10 +282,10 @@ function Cart() {
                         {/* Quantity and Actions */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label className="text-sm font-medium text-foreground">
                               Quantity:
                             </label>
-                            <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded">
+                            <div className="flex items-center border border-border rounded">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -300,7 +303,7 @@ function Cart() {
                               >
                                 -
                               </Button>
-                              <span className="px-3 py-1 text-center min-w-[3rem]">
+                              <span className="px-3 py-1 text-center min-w-[3rem] text-foreground">
                                 {actionLoading === item.id
                                   ? "..."
                                   : item.quantity}
@@ -383,14 +386,17 @@ function Cart() {
                     <span>{formatPrice(cart.totalDiscountedPrice)}</span>
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button
+                    className="w-full hover:bg-[#455A64] dark:hover:bg-[#f2fbff]"
+                    size="lg"
+                  >
                     <CreditCard className="w-4 h-4 mr-2" />
                     Proceed to Checkout
                   </Button>
 
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-[#455A64] text-[#263238] dark:text-white dark:border-[#B0BEC5] hover:bg-[#F7F7F7] dark:hover:bg-[#455A64]"
                     onClick={() => router.push("/products")}
                   >
                     <Package className="w-4 h-4 mr-2" />

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { WishlistItem } from "@/types/frontend";
 import { cn } from "@/lib/utils";
 import { generateUniqueSlug } from "@/utils/slug";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
 interface WishlistProductCardProps {
   product: WishlistItem;
@@ -36,36 +37,42 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
     return 0;
   };
 
-  const handleRemoveFromWishlist = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isRemoving || !onRemoveFromWishlist) return;
-    
-    setIsRemoving(true);
-    try {
-      await onRemoveFromWishlist(product.id);
-    } finally {
-      setIsRemoving(false);
-    }
-  };
+  const handleRemoveFromWishlist = useDebouncedCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (isRemoving || !onRemoveFromWishlist) return;
+      
+      setIsRemoving(true);
+      try {
+        await onRemoveFromWishlist(product.id);
+      } finally {
+        setIsRemoving(false);
+      }
+    },
+    300 // 300ms debounce delay
+  );
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isAddingToCart || !onAddToCart) return;
-    
-    setIsAddingToCart(true);
-    try {
-      await onAddToCart(product.id);
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
+  const handleAddToCart = useDebouncedCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (isAddingToCart || !onAddToCart) return;
+      
+      setIsAddingToCart(true);
+      try {
+        await onAddToCart(product.id);
+      } finally {
+        setIsAddingToCart(false);
+      }
+    },
+    300 // 300ms debounce delay
+  );
 
   const productSlug = product.slug || generateUniqueSlug(product.name, product.id);
   const savings = calculateSavings();
   const effectivePrice = product.dealPrice || product.discountedPrice;
 
   return (
-    <div className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="group relative bg-card rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-border overflow-hidden">
       {/* Deal Badge */}
       {product.activeDeal && (
         <div className="absolute top-3 left-3 z-10">
@@ -79,7 +86,7 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        className="absolute top-3 right-3 z-10 h-8 w-8 p-0 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 shadow-sm"
+        className="absolute top-3 right-3 z-10 h-8 w-8 p-0 bg-background/80 hover:bg-background border border-border shadow-sm"
         onClick={handleRemoveFromWishlist}
         disabled={isRemoving || isLoading}
       >
@@ -92,7 +99,7 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
 
       <Link href={`/products/${productSlug}`} className="block">
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700">
+        <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
             src={product.mainImage || "/default-product.jpg"}
             alt={product.name}
@@ -113,13 +120,13 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
 
         {/* Product Info */}
         <div className="p-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-semibold text-card-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
 
           {/* Stock Status */}
           <div className="flex items-center gap-1 mb-2">
-            <Package className="h-3 w-3" />
+            <Package className="h-3 w-3 text-muted-foreground" />
             <span className={cn(
               "text-xs font-medium",
               product.stock > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
@@ -133,10 +140,10 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
             {product.dealPrice ? (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="text-lg font-bold text-card-foreground">
                     {formatPrice(product.dealPrice)}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                  <span className="text-sm text-muted-foreground line-through">
                     {formatPrice(product.price)}
                   </span>
                 </div>
@@ -147,7 +154,7 @@ const WishlistProductCard: React.FC<WishlistProductCardProps> = ({
                 )}
               </div>
             ) : (
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
+              <span className="text-lg font-bold text-card-foreground">
                 {formatPrice(effectivePrice)}
               </span>
             )}

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { CartItem } from "@/types/frontend";
 import { cn } from "@/lib/utils";
 import { generateUniqueSlug } from "@/utils/slug";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
 interface CartProductCardProps {
   item: CartItem;
@@ -35,12 +36,15 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
     return 0;
   };
 
-  const handleQuantityChange = (newQuantity: number) => {
-    if (onUpdateQuantity) {
-      setQuantity(newQuantity);
-      onUpdateQuantity(item.id, newQuantity);
-    }
-  };
+  const handleQuantityChange = useDebouncedCallback(
+    (newQuantity: number) => {
+      if (onUpdateQuantity && newQuantity >= 1) {
+        setQuantity(newQuantity);
+        onUpdateQuantity(item.id, newQuantity);
+      }
+    },
+    500 // 500ms debounce delay
+  );
 
   const handleRemoveFromCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -54,7 +58,7 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
   const effectivePrice = item.product.dealPrice || item.product.discountedPrice;
 
   return (
-    <div className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="group relative bg-card rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-border overflow-hidden">
       {/* Deal Badge */}
       {item.product.activeDeal && (
         <div className="absolute top-3 left-3 z-10">
@@ -66,7 +70,7 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
 
       <Link href={`/products/${productSlug}`} className="block">
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700">
+        <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
             src={item.product.mainImage || "/default-product.jpg"}
             alt={item.product.name}
@@ -86,13 +90,13 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
 
         {/* Product Info */}
         <div className="p-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-semibold text-card-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {item.product.name}
           </h3>
 
           {/* Stock Status */}
           <div className="flex items-center gap-1 mb-2">
-            <Package className="h-3 w-3" />
+            <Package className="h-3 w-3 text-muted-foreground" />
             <span className={cn(
               "text-xs font-medium",
               item.product.stock > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
@@ -106,10 +110,10 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
             {item.product.dealPrice ? (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="text-lg font-bold text-card-foreground">
                     {formatPrice(item.product.dealPrice * quantity)}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                  <span className="text-sm text-muted-foreground line-through">
                     {formatPrice(item.product.price * quantity)}
                   </span>
                 </div>
@@ -120,7 +124,7 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
                 )}
               </div>
             ) : (
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
+              <span className="text-lg font-bold text-card-foreground">
                 {formatPrice(effectivePrice * quantity)}
               </span>
             )}
@@ -128,7 +132,7 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
 
           {/* Quantity Selector */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-card-foreground">
               Quantity:
             </span>
             <input
@@ -136,7 +140,7 @@ const CartProductCard: React.FC<CartProductCardProps> = ({
               min="1"
               value={quantity}
               onChange={(e) => handleQuantityChange(Number(e.target.value))}
-              className="text-center border rounded p-1 w-16"
+              className="text-center border border-border rounded p-1 w-16 bg-background text-foreground"
             />
           </div>
         </div>

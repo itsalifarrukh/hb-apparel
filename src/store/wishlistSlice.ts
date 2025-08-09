@@ -34,7 +34,7 @@ export const loadWishlist = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to load wishlist');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to load wishlist. Please try again.');
     }
   }
@@ -50,7 +50,7 @@ export const removeFromWishlist = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to remove item');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to remove item from wishlist');
     }
   }
@@ -62,11 +62,18 @@ export const addToCartFromWishlistAction = createAsyncThunk(
     try {
       const response = await addToCartFromWishlist(productId);
       if (response.success) {
-        return { productId, message: 'Item added to cart' };
+        // After successfully adding to cart, remove from wishlist
+        const removeResponse = await removeItemFromWishlist(productId);
+        if (removeResponse.success) {
+          return { productId, wishlist: removeResponse.data, message: 'Item added to cart and removed from wishlist' };
+        } else {
+          // If removal fails, still return success for cart addition but with a warning
+          return { productId, message: 'Item added to cart but failed to remove from wishlist' };
+        }
       } else {
         return rejectWithValue(response.message || 'Failed to add item to cart');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to add item to cart');
     }
   }
@@ -82,7 +89,7 @@ export const moveAllToCartAction = createAsyncThunk(
       } else {
         return rejectWithValue(response.message || 'Failed to move items to cart');
       }
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to move items to cart');
     }
   }
@@ -142,6 +149,10 @@ const wishlistSlice = createSlice({
       .addCase(addToCartFromWishlistAction.fulfilled, (state, action) => {
         state.actionLoading = null;
         state.error = null;
+        // Update wishlist if removal was successful
+        if (action.payload.wishlist) {
+          state.wishlist = action.payload.wishlist;
+        }
       })
       .addCase(addToCartFromWishlistAction.rejected, (state, action) => {
         state.actionLoading = null;

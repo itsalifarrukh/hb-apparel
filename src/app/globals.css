@@ -7,7 +7,6 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-optical-sizing: auto;
-  background: #ffffff;
 }
 
 @layer base {

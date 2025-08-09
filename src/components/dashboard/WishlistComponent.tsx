@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import Link from "next/link";
 
 // Mock data - replace with real data from your API
@@ -70,32 +71,41 @@ export function WishlistComponent() {
   const [wishlistItems, setWishlistItems] = useState(mockWishlistItems);
   const { toast } = useToast();
 
-  const removeFromWishlist = (id: string) => {
-    setWishlistItems(items => items.filter(item => item.id !== id));
-    toast({
-      title: "Removed from Wishlist",
-      description: "Item has been removed from your wishlist.",
-    });
-  };
+  const removeFromWishlist = useDebouncedCallback(
+    (id: string) => {
+      setWishlistItems(items => items.filter(item => item.id !== id));
+      toast({
+        title: "Removed from Wishlist",
+        description: "Item has been removed from your wishlist.",
+      });
+    },
+    300 // 300ms debounce delay
+  );
 
-  const addToCart = (item: typeof mockWishlistItems[0]) => {
-    if (!item.inStock) return;
-    
-    toast({
-      title: "Added to Cart",
-      description: `${item.name} has been added to your cart.`,
-    });
-  };
+  const addToCart = useDebouncedCallback(
+    (item: typeof mockWishlistItems[0]) => {
+      if (!item.inStock) return;
+      
+      toast({
+        title: "Added to Cart",
+        description: `${item.name} has been added to your cart.`,
+      });
+    },
+    300 // 300ms debounce delay
+  );
 
-  const moveAllToCart = () => {
-    const inStockItems = wishlistItems.filter(item => item.inStock);
-    if (inStockItems.length === 0) return;
+  const moveAllToCart = useDebouncedCallback(
+    () => {
+      const inStockItems = wishlistItems.filter(item => item.inStock);
+      if (inStockItems.length === 0) return;
 
-    toast({
-      title: "Items Added to Cart",
-      description: `${inStockItems.length} items have been added to your cart.`,
-    });
-  };
+      toast({
+        title: "Items Added to Cart",
+        description: `${inStockItems.length} items have been added to your cart.`,
+      });
+    },
+    300 // 300ms debounce delay
+  );
 
   return (
     <div className="space-y-8 animate-fade-in">
