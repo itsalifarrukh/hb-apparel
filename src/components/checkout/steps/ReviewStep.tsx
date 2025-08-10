@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { createOrder } from "@/store/ordersSlice";
-import { previousStep, nextStep, createPaymentIntent, setCurrentStep } from "@/store/checkoutSlice";
+import { previousStep, createPaymentIntent, setCurrentStep } from "@/store/checkoutSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -30,7 +30,7 @@ export function ReviewStep() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [unsavedPaymentMethodId, setUnsavedPaymentMethodId] = useState<string | null>(null);
+  // Removed unused variable: unsavedPaymentMethodId
   const [showUnsavedPaymentForm, setShowUnsavedPaymentForm] = useState(false);
 
   const {
@@ -86,9 +86,9 @@ export function ReviewStep() {
         }
         
         console.log('Payment intent created successfully:', paymentIntentResult);
-      } catch (paymentError: any) {
+      } catch (paymentError: unknown) {
         console.warn('Payment intent creation failed:', paymentError);
-        const msg = paymentError?.message || 'Payment authorization failed';
+        const msg = (paymentError instanceof Error ? paymentError.message : null) || 'Payment authorization failed';
         toast({
           title: 'Payment Error',
           description: msg,
@@ -172,9 +172,9 @@ export function ReviewStep() {
         try {
           const paymentIntentResult = await dispatch(createPaymentIntent(paymentIntentData)).unwrap();
           console.log('Payment intent created successfully:', paymentIntentResult);
-        } catch (paymentError: any) {
+        } catch (paymentError: unknown) {
           console.warn('Payment intent creation failed:', paymentError);
-          const msg = paymentError?.message || 'Payment authorization failed';
+          const msg = (paymentError instanceof Error ? paymentError.message : null) || 'Payment authorization failed';
           toast({
             title: 'Payment Error',
             description: msg,
@@ -520,7 +520,6 @@ export function ReviewStep() {
           <CardContent>
             <UnsavedStripePaymentForm
               onPaymentComplete={(paymentMethodId) => {
-                setUnsavedPaymentMethodId(paymentMethodId);
                 handlePlaceOrderWithUnsavedPayment(paymentMethodId);
               }}
               userEmail={checkoutSummary.user.email}

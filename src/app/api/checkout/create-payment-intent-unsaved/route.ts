@@ -229,7 +229,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Stripe SDK error handling
-    const maybeStripeError = error as any;
+    const maybeStripeError = error as { 
+      type?: string; 
+      code?: string; 
+      message?: string; 
+      rawType?: string; 
+    };
     if (
       maybeStripeError &&
       typeof maybeStripeError === "object" &&

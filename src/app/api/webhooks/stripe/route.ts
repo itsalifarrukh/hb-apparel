@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 import Stripe from "stripe";
 
 // Configure Next.js to use raw body for webhooks
@@ -101,14 +102,18 @@ async function handlePaymentIntentSucceeded(
 
     if (existingOrder) {
       // Update existing order
-      const updateData: any = {
-        paymentStatus: "SUCCEEDED",
+      const updateData: {
+        paymentStatus: PaymentStatus;
+        stripePaymentIntentId: string;
+        status?: OrderStatus;
+      } = {
+        paymentStatus: PaymentStatus.SUCCEEDED,
         stripePaymentIntentId: paymentIntent.id,
       };
       
       // Only update status to CONFIRMED if it's currently PENDING
-      if (existingOrder.status === "PENDING") {
-        updateData.status = "CONFIRMED";
+      if (existingOrder.status === OrderStatus.PENDING) {
+        updateData.status = OrderStatus.CONFIRMED;
       }
       
       await prisma.order.update({
@@ -136,7 +141,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
       await prisma.order.update({
         where: { id: orderId },
         data: {
-          paymentStatus: "FAILED",
+          paymentStatus: PaymentStatus.FAILED,
         },
       });
 
@@ -230,14 +235,4 @@ async function updateProductStockForOrder(orderId: string) {
   }
 }
 
-async function updateProductStock(paymentIntent: Stripe.PaymentIntent) {
-  try {
-    const orderId = paymentIntent.metadata.orderId;
-
-    if (orderId) {
-      await updateProductStockForOrder(orderId);
-    }
-  } catch (error) {
-    console.error("Error updating product stock:", error);
-  }
-}
+// Removed unused function updateProductStock - functionality moved to updateProductStockForOrder

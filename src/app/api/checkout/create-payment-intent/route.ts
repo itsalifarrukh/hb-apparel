@@ -195,8 +195,8 @@ export async function POST(request: NextRequest) {
         // to avoid Stripe error: "You may only specify one of these parameters: automatic_payment_methods, confirmation_method."
         // Instead, explicitly set supported payment method types.
         // Remove automatic payment methods setting if present
-        // @ts-expect-error - optional field that we'll conditionally remove
-        delete (paymentIntentParams as any).automatic_payment_methods;
+        // Remove automatic_payment_methods when using specific payment method
+        delete (paymentIntentParams as Stripe.PaymentIntentCreateParams & { automatic_payment_methods?: { enabled: boolean } }).automatic_payment_methods;
         paymentIntentParams.payment_method_types = ["card"];
         paymentIntentParams.confirmation_method = "manual";
         paymentIntentParams.confirm = true;
@@ -254,7 +254,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Stripe SDK error handling (works across versions)
-    const maybeStripeError = error as any;
+    const maybeStripeError = error as { 
+      type?: string; 
+      code?: string; 
+      message?: string; 
+      rawType?: string; 
+    };
     if (
       maybeStripeError &&
       typeof maybeStripeError === "object" &&

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+// Removed unused useEffect import
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetCheckout } from '@/store/checkoutSlice';

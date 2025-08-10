@@ -14,8 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentMethodSelector } from '@/components/checkout/forms/PaymentMethodSelector';
 import { StripePaymentForm } from '@/components/checkout/forms/StripePaymentForm';
-import { UnsavedStripePaymentForm } from '@/components/checkout/forms/UnsavedStripePaymentForm';
-import { CreditCard, Plus, ArrowRight, ArrowLeft, Zap } from 'lucide-react';
+import { CreditCard, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export function PaymentStep() {
   const dispatch = useAppDispatch();
