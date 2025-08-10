@@ -3,17 +3,18 @@
 import { Menu, Bell, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface DashboardHeaderProps {
   setSidebarOpen: (open: boolean) => void;
@@ -39,7 +40,7 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
       {/* Breadcrumb or page title could go here */}
       <div className="flex-1">
         <h1 className="text-xl font-semibold text-foreground">
-          Welcome back, {session?.user?.name || 'User'}!
+          Welcome back, {session?.user?.name || "User"}!
         </h1>
       </div>
 
@@ -60,8 +61,8 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
         {/* Notifications */}
         <Button variant="ghost" size="sm" className="relative w-9 h-9 p-0">
           <Bell className="h-4 w-4" />
-          <Badge 
-            variant="destructive" 
+          <Badge
+            variant="destructive"
             className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]"
           >
             3
@@ -74,12 +75,12 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarImage 
-                  src={session?.user?.image || "/DefaultAvatar.png"} 
-                  alt={session?.user?.name || "User"} 
+                <AvatarImage
+                  src={session?.user?.image || "/DefaultAvatar.png"}
+                  alt={session?.user?.name || "User"}
                 />
                 <AvatarFallback>
-                  {session?.user?.name?.[0] || 'U'}
+                  {session?.user?.name?.[0] || "U"}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -97,13 +98,13 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a href="/dashboard/profile">Profile Settings</a>
+              <Link href="/dashboard/profile">Profile Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/dashboard/orders">My Orders</a>
+              <Link href="/dashboard/orders">My Orders</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/dashboard/settings">Account Settings</a>
+              <Link href="/dashboard/settings">Account Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600">

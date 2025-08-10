@@ -31,6 +31,28 @@ export default function CheckoutPage() {
     currentStep,
   } = useAppSelector((state) => state.checkout);
 
+  // Persist/restore checkout step across reloads
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem('checkout_current_step') : null;
+      if (!initialized && saved) {
+        const step = parseInt(saved, 10);
+        if (!Number.isNaN(step) && step >= 1 && step <= 4) {
+          dispatch(setCurrentStep(step));
+        }
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialized, dispatch]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('checkout_current_step', String(currentStep));
+      }
+    } catch {}
+  }, [currentStep]);
+
   useEffect(() => {
     if (!initialized) {
       dispatch(fetchCheckoutSummary())

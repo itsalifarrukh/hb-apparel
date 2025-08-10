@@ -95,7 +95,7 @@ export function CheckoutSummary() {
                   {formatCurrency(item.itemTotal)}
                 </p>
                 {item.savings > 0 && (
-                  <p className="text-xs text-green-600">
+                  <p className="text-xs text-green-600 dark:text-green-400">
                     Save {formatCurrency(item.savings * item.quantity)}
                   </p>
                 )}
@@ -131,7 +131,7 @@ export function CheckoutSummary() {
             </div>
             <span className="font-medium">
               {orderSummary.shippingCost === 0 ? (
-                <span className="text-green-600 font-medium">FREE</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">FREE</span>
               ) : (
                 formatCurrency(orderSummary.shippingCost)
               )}
@@ -175,9 +175,9 @@ export function CheckoutSummary() {
           {/* Deal Expiry Warning */}
           {cart.items.some(item => item.activeDeal) && (
             <div className="flex items-start gap-2 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <Clock className="h-4 w-4 text-orange-600 mt-0.5" />
+              <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5" />
               <div className="text-sm">
-                <p className="text-orange-600 font-medium">
+                <p className="text-orange-600 dark:text-orange-400 font-medium">
                   Limited Time Offers
                 </p>
                 <p className="text-orange-700 dark:text-orange-400">

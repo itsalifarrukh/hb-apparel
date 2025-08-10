@@ -27,12 +27,9 @@ export function CompleteStep() {
 
   const { currentOrder } = useAppSelector((state) => state.orders);
 
-  useEffect(() => {
-    // Clear checkout state after successful order
-    return () => {
-      dispatch(resetCheckout());
-    };
-  }, [dispatch]);
+  // Do NOT auto-reset checkout on mount/unmount. In React Strict Mode, effect cleanup
+  // runs between double-invocations and would reset immediately back to step 1.
+  // We reset explicitly when user navigates away via the action buttons below.
 
   const handleContinueShopping = () => {
     dispatch(resetCheckout());

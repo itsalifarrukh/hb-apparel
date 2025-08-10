@@ -88,6 +88,9 @@ model User {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
+  // Stripe customer linkage for faster payment intent creation
+  stripeCustomerId       String?
+
   accounts         Account[]
   sessions         Session[]
   reviews          Review[]

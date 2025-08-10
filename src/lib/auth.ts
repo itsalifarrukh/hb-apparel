@@ -21,6 +21,7 @@ export async function getAuthenticatedUser(request: NextRequest) {
       phoneNumber: true,
       role: true,
       isEmailVerified: true,
+      stripeCustomerId: true,
     },
   });
   
@@ -37,6 +38,7 @@ export async function getAuthenticatedUser(request: NextRequest) {
     phoneNumber: user.phoneNumber,
     role: user.role,
     isEmailVerified: user.isEmailVerified,
+    stripeCustomerId: user.stripeCustomerId || undefined,
   };
 }
 

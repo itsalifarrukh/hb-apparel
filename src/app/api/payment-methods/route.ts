@@ -73,10 +73,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = paymentMethodSchema.parse(body);
 
+    // Ensure a Stripe customer exists on the user
+    let stripeCustomerId = null as string | null;
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { stripeCustomerId: true, email: true, firstName: true, lastName: true, username: true } });
+    stripeCustomerId = dbUser?.stripeCustomerId || null;
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: dbUser?.email || undefined,
+        name: dbUser?.firstName && dbUser?.lastName ? `${dbUser.firstName} ${dbUser.lastName}` : dbUser?.username || undefined,
+        metadata: { userId: user.id },
+      });
+      stripeCustomerId = customer.id;
+      await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId } });
+    }
+
     // Retrieve payment method from Stripe to get card details
     const stripePaymentMethod = await stripe.paymentMethods.retrieve(
       validatedData.stripePaymentMethodId
     );
+
+    // Attach PM to this customer if not already attached
+    if (!stripePaymentMethod.customer) {
+      try {
+        await stripe.paymentMethods.attach(validatedData.stripePaymentMethodId, { customer: stripeCustomerId });
+      } catch (err) {
+        console.error("Error attaching payment method to customer:", err);
+      }
+    }
 
     if (!stripePaymentMethod.card) {
       return NextResponse.json(

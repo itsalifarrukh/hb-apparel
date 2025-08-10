@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentMethodSelector } from '@/components/checkout/forms/PaymentMethodSelector';
 import { StripePaymentForm } from '@/components/checkout/forms/StripePaymentForm';
-import { CreditCard, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
+import { UnsavedStripePaymentForm } from '@/components/checkout/forms/UnsavedStripePaymentForm';
+import { CreditCard, Plus, ArrowRight, ArrowLeft, Zap } from 'lucide-react';
 
 export function PaymentStep() {
   const dispatch = useAppDispatch();
@@ -47,11 +48,11 @@ export function PaymentStep() {
   };
 
   const handleContinue = () => {
-    // Validate that we have a payment method selected
-    if (!selectedPaymentMethodId && !showNewPaymentForm) {
+    // We can proceed without a payment method for now (payment can be handled at order creation)
+    if (showNewPaymentForm) {
       toast({
-        title: "Payment Method Required",
-        description: "Please select or add a payment method",
+        title: "Complete Payment Method",
+        description: "Please finish adding your payment method or cancel to proceed",
         variant: "destructive",
       });
       return;

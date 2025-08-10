@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { createOrder } from "@/store/ordersSlice";
-import { previousStep, nextStep } from "@/store/checkoutSlice";
+import { previousStep, nextStep, createPaymentIntent, setCurrentStep } from "@/store/checkoutSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -20,7 +20,9 @@ import {
   Edit,
   Building,
   Phone,
+  Zap,
 } from "lucide-react";
+import { UnsavedStripePaymentForm } from "@/components/checkout/forms/UnsavedStripePaymentForm";
 import Image from "next/image";
 
 export function ReviewStep() {
@@ -28,6 +30,8 @@ export function ReviewStep() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [unsavedPaymentMethodId, setUnsavedPaymentMethodId] = useState<string | null>(null);
+  const [showUnsavedPaymentForm, setShowUnsavedPaymentForm] = useState(false);
 
   const {
     checkoutSummary,
@@ -42,22 +46,148 @@ export function ReviewStep() {
     dispatch(previousStep());
   };
 
+  const handlePlaceOrderWithUnsavedPayment = async (stripePaymentMethodId: string) => {
+    if (!checkoutSummary) return;
+
+    try {
+      setIsPlacingOrder(true);
+
+      // Validate required fields
+      if (!selectedShippingAddressId) {
+        throw new Error('Please select a shipping address');
+      }
+      
+      if (!useShippingAsBilling && !selectedBillingAddressId) {
+        throw new Error('Please select a billing address');
+      }
+
+      // Create payment intent with the unsaved Stripe payment method
+      const paymentIntentData = {
+        shippingAddressId: selectedShippingAddressId || undefined,
+        billingAddressId: useShippingAsBilling ? selectedShippingAddressId || undefined : selectedBillingAddressId || undefined,
+        // Don't pass a saved paymentMethodId, create with Stripe payment method directly
+        unsavedStripePaymentMethodId: stripePaymentMethodId,
+        savePaymentMethod: false,
+      };
+
+      console.log('Creating payment intent for unsaved payment method:', paymentIntentData);
+      
+      try {
+        // Create a custom payment intent for unsaved payment methods
+        const response = await fetch('/api/checkout/create-payment-intent-unsaved', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentIntentData),
+        });
+        
+        const paymentIntentResult = await response.json();
+        if (!response.ok) {
+          throw new Error(paymentIntentResult.message || 'Payment intent creation failed');
+        }
+        
+        console.log('Payment intent created successfully:', paymentIntentResult);
+      } catch (paymentError: any) {
+        console.warn('Payment intent creation failed:', paymentError);
+        const msg = paymentError?.message || 'Payment authorization failed';
+        toast({
+          title: 'Payment Error',
+          description: msg,
+          variant: 'destructive',
+        });
+        return; // Stop here if payment fails
+      }
+
+      // Create the order
+      const orderData = {
+        shippingAddressId: selectedShippingAddressId || undefined,
+        billingAddressId: useShippingAsBilling ? selectedShippingAddressId || undefined : selectedBillingAddressId || undefined,
+        // Don't include a paymentMethodId for unsaved payments
+      };
+
+      console.log('Creating order with data:', orderData);
+      
+      const result = await dispatch(createOrder(orderData)).unwrap();
+      
+      console.log('Order created successfully:', result);
+
+      // Move to completion step explicitly
+      dispatch(setCurrentStep(4));
+
+      toast({
+        title: "Order Placed and Paid!",
+        description: `Your order #${result.orderNumber} has been placed and payment processed.`,
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place order';
+      console.error('Error during order placement:', error);
+      
+      toast({
+        title: "Order Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!checkoutSummary) return;
 
     try {
       setIsPlacingOrder(true);
 
+      // Validate required fields
+      if (!selectedShippingAddressId) {
+        throw new Error('Please select a shipping address');
+      }
+      
+      if (!useShippingAsBilling && !selectedBillingAddressId) {
+        throw new Error('Please select a billing address');
+      }
+
+      // Create the order first
       const orderData = {
         shippingAddressId: selectedShippingAddressId || undefined,
         billingAddressId: useShippingAsBilling ? selectedShippingAddressId || undefined : selectedBillingAddressId || undefined,
         paymentMethodId: selectedPaymentMethodId || undefined,
       };
 
+      console.log('Creating order with data:', orderData);
+      
       const result = await dispatch(createOrder(orderData)).unwrap();
+      
+      console.log('Order created successfully:', result);
 
-      // Move to completion step
-      dispatch(nextStep());
+      // Now create payment intent with the orderId if we have a saved payment method
+      if (selectedPaymentMethodId) {
+        const paymentIntentData = {
+          orderId: result.id, // Link payment intent to the order
+          paymentMethodId: selectedPaymentMethodId || undefined,
+          savePaymentMethod: false,
+        };
+
+        console.log('Creating payment intent with orderId:', paymentIntentData);
+        
+        try {
+          const paymentIntentResult = await dispatch(createPaymentIntent(paymentIntentData)).unwrap();
+          console.log('Payment intent created successfully:', paymentIntentResult);
+        } catch (paymentError: any) {
+          console.warn('Payment intent creation failed:', paymentError);
+          const msg = paymentError?.message || 'Payment authorization failed';
+          toast({
+            title: 'Payment Error',
+            description: msg,
+            variant: 'destructive',
+          });
+          return; // Stop here if payment fails
+        }
+      } else {
+        console.log('No saved payment method selected, skipping payment intent creation');
+      }
+
+      // Move to completion step explicitly
+      dispatch(setCurrentStep(4));
 
       toast({
         title: "Order Placed Successfully!",
@@ -65,6 +195,8 @@ export function ReviewStep() {
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to place order';
+      console.error('Error during order placement:', error);
+      
       toast({
         title: "Order Failed",
         description: errorMessage,
@@ -155,7 +287,7 @@ export function ReviewStep() {
                     {formatCurrency(item.itemTotal)}
                   </p>
                   {item.savings > 0 && (
-                    <p className="text-sm text-green-600">
+                    <p className="text-sm text-green-600 dark:text-green-400">
                       Save {formatCurrency(item.savings * item.quantity)}
                     </p>
                   )}
@@ -349,10 +481,59 @@ export function ReviewStep() {
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground">No payment method selected</p>
+            <div className="space-y-3">
+              <p className="text-muted-foreground">No payment method selected</p>
+              {!showUnsavedPaymentForm && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUnsavedPaymentForm(true)}
+                  className="gap-2"
+                >
+                  <Zap className="h-4 w-4" />
+                  Pay with New Card
+                </Button>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Unsaved Payment Form */}
+      {!paymentMethod && showUnsavedPaymentForm && (
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                Complete Payment
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowUnsavedPaymentForm(false)}
+                disabled={isPlacingOrder}
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <UnsavedStripePaymentForm
+              onPaymentComplete={(paymentMethodId) => {
+                setUnsavedPaymentMethodId(paymentMethodId);
+                handlePlaceOrderWithUnsavedPayment(paymentMethodId);
+              }}
+              userEmail={checkoutSummary.user.email}
+              userName={checkoutSummary.user.firstName && checkoutSummary.user.lastName
+                ? `${checkoutSummary.user.firstName} ${checkoutSummary.user.lastName}`
+                : ''
+              }
+              amount={orderSummary.totalAmount}
+              disabled={isPlacingOrder}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Order Summary */}
       <Card>

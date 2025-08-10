@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 
+// Configure Next.js to use raw body for webhooks
+export const runtime = "nodejs";
+export const config = {
+  api: {
+    bodyParser: false, // important for Stripe
+  },
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-07-30.basil",
 });
@@ -28,21 +36,27 @@ export async function POST(request: NextRequest) {
     // Handle the event
     switch (event.type) {
       case "payment_intent.succeeded":
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+        await handlePaymentIntentSucceeded(
+          event.data.object as Stripe.PaymentIntent
+        );
         break;
-      
+
       case "payment_intent.payment_failed":
-        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+        await handlePaymentIntentFailed(
+          event.data.object as Stripe.PaymentIntent
+        );
         break;
-      
+
       case "payment_method.attached":
-        await handlePaymentMethodAttached(event.data.object as Stripe.PaymentMethod);
+        await handlePaymentMethodAttached(
+          event.data.object as Stripe.PaymentMethod
+        );
         break;
-      
+
       case "invoice.payment_succeeded":
         // Handle subscription payments if you have them
         break;
-      
+
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
@@ -57,7 +71,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentSucceeded(
+  paymentIntent: Stripe.PaymentIntent
+) {
   try {
     const userId = paymentIntent.metadata.userId;
     const orderId = paymentIntent.metadata.orderId;
@@ -67,112 +83,46 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       return;
     }
 
+    // First try to find an existing order by payment intent ID or order ID
+    let existingOrder = null;
+    
     if (orderId) {
-      // Update existing order
-      await prisma.order.update({
+      existingOrder = await prisma.order.findUnique({
         where: { id: orderId },
-        data: {
-          paymentStatus: "SUCCEEDED",
-          status: "CONFIRMED",
-          stripePaymentIntentId: paymentIntent.id,
-        },
       });
-
-      console.log(`Order ${orderId} payment confirmed`);
-    } else {
-      // Payment was for cart checkout, need to create order
-      const cart = await prisma.cart.findFirst({
-        where: { userId },
-        include: {
-          items: {
-            include: {
-              product: {
-                include: {
-                  deals: {
-                    include: {
-                      deal: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+    }
+    
+    if (!existingOrder) {
+      // Try to find by payment intent ID
+      existingOrder = await prisma.order.findFirst({
+        where: { stripePaymentIntentId: paymentIntent.id },
       });
-
-      if (cart && cart.items.length > 0) {
-        // Create order from cart items
-        let subtotal = 0;
-        const now = new Date();
-
-        const orderItems = cart.items.map((item) => {
-          const product = item.product;
-          
-          // Find active deal
-          const activeDeal = product.deals
-            .filter(
-              (pd) => pd.deal && pd.deal.startTime <= now && pd.deal.endTime >= now
-            )
-            .map((pd) => pd.deal)[0] || null;
-
-          const dealPrice = activeDeal
-            ? product.price - (product.price * activeDeal.discount) / 100
-            : null;
-
-          const effectivePrice = dealPrice || product.discountedPrice;
-          const discount = product.price - effectivePrice;
-          
-          subtotal += effectivePrice * item.quantity;
-
-          return {
-            productId: item.productId,
-            quantity: item.quantity,
-            price: effectivePrice,
-            discount,
-            productName: product.name,
-            productImage: product.mainImage,
-            productSize: null,
-            productColor: null,
-          };
-        });
-
-        const taxRate = 0.08;
-        const taxAmount = subtotal * taxRate;
-        const shippingCost = subtotal > 50 ? 0 : 5.99;
-        const totalAmount = subtotal + taxAmount + shippingCost;
-
-        // Generate order number
-        const { generateOrderNumber } = await import("@/utils/orderUtils");
-        const orderNumber = await generateOrderNumber();
-
-        const order = await prisma.order.create({
-          data: {
-            userId,
-            orderNumber,
-            subtotal,
-            shippingCost,
-            taxAmount,
-            totalAmount,
-            status: "CONFIRMED",
-            paymentStatus: "SUCCEEDED",
-            stripePaymentIntentId: paymentIntent.id,
-            items: {
-              create: orderItems,
-            },
-          },
-        });
-
-        // Clear the cart
-        await prisma.cartItem.deleteMany({
-          where: { cartId: cart.id },
-        });
-
-        console.log(`Order ${order.id} created from cart after payment success`);
-      }
     }
 
-    // Update product stock
-    await updateProductStock(paymentIntent);
+    if (existingOrder) {
+      // Update existing order
+      const updateData: any = {
+        paymentStatus: "SUCCEEDED",
+        stripePaymentIntentId: paymentIntent.id,
+      };
+      
+      // Only update status to CONFIRMED if it's currently PENDING
+      if (existingOrder.status === "PENDING") {
+        updateData.status = "CONFIRMED";
+      }
+      
+      await prisma.order.update({
+        where: { id: existingOrder.id },
+        data: updateData,
+      });
+
+      console.log(`Order ${existingOrder.id} payment confirmed via webhook`);
+      
+      // Update product stock for the existing order
+      await updateProductStockForOrder(existingOrder.id);
+    } else {
+      console.log(`No existing order found for payment intent ${paymentIntent.id}. Order may have been created elsewhere or this is a standalone payment.`);
+    }
   } catch (error) {
     console.error("Error handling payment intent succeeded:", error);
   }
@@ -197,37 +147,95 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   }
 }
 
-async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) {
+async function handlePaymentMethodAttached(
+  paymentMethod: Stripe.PaymentMethod
+) {
   try {
-    // You might want to automatically save payment methods for returning customers
-    console.log(`Payment method ${paymentMethod.id} attached to customer ${paymentMethod.customer}`);
+    const customerId = paymentMethod.customer as string;
+    if (!customerId) return;
+
+    // Find user by stripeCustomerId
+    const user = await prisma.user.findFirst({
+      where: { stripeCustomerId: customerId },
+    });
+
+    if (!user) {
+      console.log(`No user found for customer ${customerId}`);
+      return;
+    }
+
+    // Check if payment method already exists
+    const existingPaymentMethod = await prisma.paymentMethod.findFirst({
+      where: {
+        stripePaymentMethodId: paymentMethod.id,
+        userId: user.id,
+      },
+    });
+
+    if (
+      !existingPaymentMethod &&
+      paymentMethod.type === "card" &&
+      paymentMethod.card
+    ) {
+      // Save the payment method
+      await prisma.paymentMethod.create({
+        data: {
+          userId: user.id,
+          type: "CREDIT_CARD",
+          stripePaymentMethodId: paymentMethod.id,
+          last4: paymentMethod.card.last4,
+          brand: paymentMethod.card.brand,
+          expiryMonth: paymentMethod.card.exp_month,
+          expiryYear: paymentMethod.card.exp_year,
+          billingName:
+            paymentMethod.billing_details?.name ||
+            `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          billingEmail:
+            paymentMethod.billing_details?.email || user.email || "",
+          isDefault: false, // Will be set to true if it's their first payment method
+        },
+      });
+
+      console.log(
+        `Payment method ${paymentMethod.id} saved for user ${user.id}`
+      );
+    }
   } catch (error) {
     console.error("Error handling payment method attached:", error);
+  }
+}
+
+async function updateProductStockForOrder(orderId: string) {
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    if (order) {
+      for (const item of order.items) {
+        await prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+      console.log(`Updated stock for order ${orderId}`);
+    }
+  } catch (error) {
+    console.error(`Error updating product stock for order ${orderId}:`, error);
   }
 }
 
 async function updateProductStock(paymentIntent: Stripe.PaymentIntent) {
   try {
     const orderId = paymentIntent.metadata.orderId;
-    
-    if (orderId) {
-      const order = await prisma.order.findUnique({
-        where: { id: orderId },
-        include: { items: true },
-      });
 
-      if (order) {
-        for (const item of order.items) {
-          await prisma.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                decrement: item.quantity,
-              },
-            },
-          });
-        }
-      }
+    if (orderId) {
+      await updateProductStockForOrder(orderId);
     }
   } catch (error) {
     console.error("Error updating product stock:", error);

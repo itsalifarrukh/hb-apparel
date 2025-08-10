@@ -5,27 +5,23 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { calculateOrderSummary } from "@/utils/orderUtils";
 
-// Ensure a valid Stripe API version is used. Remove future-dated versions that cause failures.
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 if (!STRIPE_SECRET_KEY) {
   console.error("Stripe configuration error: STRIPE_SECRET_KEY is not set");
 }
 const stripe = new Stripe(STRIPE_SECRET_KEY || "", {
-  // Use a stable, supported API version. If omitted, Stripe SDK uses its default pinned version.
   apiVersion: "2025-07-30.basil",
 });
 
-// Validation schema for payment intent creation
-const createPaymentIntentSchema = z.object({
-  orderId: z.string().optional(), // If creating intent for existing order
-  // If creating intent for cart checkout
+// Validation schema for unsaved payment intent creation
+const createUnsavedPaymentIntentSchema = z.object({
+  orderId: z.string().optional(),
   shippingAddressId: z.string().optional(),
   billingAddressId: z.string().optional(),
-  paymentMethodId: z.string().optional(),
-  savePaymentMethod: z.boolean().default(false),
+  unsavedStripePaymentMethodId: z.string(),
 });
 
-// POST - Create payment intent for checkout
+// POST - Create payment intent for unsaved payment method
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(request);
@@ -34,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validatedData = createPaymentIntentSchema.parse(body);
+    const validatedData = createUnsavedPaymentIntentSchema.parse(body);
 
     let amount = 0;
     let orderData = null;
@@ -111,7 +107,6 @@ export async function POST(request: NextRequest) {
           ? product.price - (product.price * activeDeal.discount) / 100
           : null;
 
-        // Be robust against null/undefined discountedPrice
         const effectivePrice =
           dealPrice ?? product.discountedPrice ?? product.price;
         subtotal += effectivePrice * item.quantity;
@@ -121,29 +116,8 @@ export async function POST(request: NextRequest) {
       amount = Math.round(orderSummary.totalAmount * 100); // Convert to cents
     }
 
-    // Create or retrieve Stripe customer
+    // Get or create Stripe customer
     let stripeCustomerId: string | null = user.stripeCustomerId || null;
-
-    // If not present on user, try to infer from an existing saved payment method
-    if (!stripeCustomerId) {
-      const existingPaymentMethod = await prisma.paymentMethod.findFirst({
-        where: { userId: user.id },
-      });
-
-      if (existingPaymentMethod?.stripePaymentMethodId) {
-        try {
-          const paymentMethod = await stripe.paymentMethods.retrieve(
-            existingPaymentMethod.stripePaymentMethodId
-          );
-          stripeCustomerId = (paymentMethod.customer as string) || null;
-        } catch (error) {
-          console.error(
-            "Error retrieving customer from payment method:",
-            error
-          );
-        }
-      }
-    }
 
     if (!stripeCustomerId) {
       // Create new Stripe customer and persist to user
@@ -165,44 +139,45 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create payment intent
+    // Attach payment method to customer if not already attached
+    try {
+      const paymentMethod = await stripe.paymentMethods.retrieve(
+        validatedData.unsavedStripePaymentMethodId
+      );
+
+      if (!paymentMethod.customer) {
+        await stripe.paymentMethods.attach(
+          validatedData.unsavedStripePaymentMethodId,
+          {
+            customer: stripeCustomerId,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error attaching payment method to customer:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid payment method",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create payment intent with confirmation
     const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
       amount,
       currency: "usd",
       customer: stripeCustomerId,
+      payment_method: validatedData.unsavedStripePaymentMethodId,
+      confirmation_method: "manual",
+      confirm: true,
+      return_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
       metadata: {
         userId: user.id,
         ...(orderId && { orderId }),
       },
-      automatic_payment_methods: {
-        enabled: true,
-      },
     };
-
-    // If payment method is specified, attach it
-    if (validatedData.paymentMethodId) {
-      const paymentMethod = await prisma.paymentMethod.findFirst({
-        where: {
-          id: validatedData.paymentMethodId,
-          userId: user.id,
-        },
-      });
-
-      if (paymentMethod?.stripePaymentMethodId) {
-        paymentIntentParams.payment_method =
-          paymentMethod.stripePaymentMethodId;
-        // When confirming with a specific payment method, do NOT use automatic_payment_methods
-        // to avoid Stripe error: "You may only specify one of these parameters: automatic_payment_methods, confirmation_method."
-        // Instead, explicitly set supported payment method types.
-        // Remove automatic payment methods setting if present
-        // @ts-expect-error - optional field that we'll conditionally remove
-        delete (paymentIntentParams as any).automatic_payment_methods;
-        paymentIntentParams.payment_method_types = ["card"];
-        paymentIntentParams.confirmation_method = "manual";
-        paymentIntentParams.confirm = true;
-        paymentIntentParams.return_url = `${process.env.NEXTAUTH_URL}/checkout/success`;
-      }
-    }
 
     if (!STRIPE_SECRET_KEY) {
       return NextResponse.json(
@@ -233,13 +208,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status,
         amount: amount / 100, // Convert back to dollars
         customerId: stripeCustomerId,
         ...(orderData && { order: orderData }),
       },
-      message: "Payment intent created successfully",
+      message: "Payment intent created and confirmed successfully",
     });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -253,7 +228,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Stripe SDK error handling (works across versions)
+    // Stripe SDK error handling
     const maybeStripeError = error as any;
     if (
       maybeStripeError &&
@@ -276,7 +251,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error creating payment intent:", error);
+    console.error("Error creating unsaved payment intent:", error);
     return NextResponse.json(
       {
         success: false,
