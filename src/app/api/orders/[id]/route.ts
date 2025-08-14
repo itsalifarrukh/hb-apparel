@@ -29,7 +29,7 @@ export async function GET(
 ) {
   try {
     const params = await segmentData.params;
-    const { id } = params;
+    const { id } = params; // This is actually orderNumber now
 
     const user = await getAuthenticatedUser(request);
     if (!user) {
@@ -38,7 +38,7 @@ export async function GET(
 
     const order = await prisma.order.findFirst({
       where: {
-        id: id,
+        orderNumber: id, // Search by orderNumber instead of id
         userId: user.id,
       },
       include: {
@@ -140,7 +140,7 @@ export async function PUT(
     // Check if order exists and belongs to user
     const existingOrder = await prisma.order.findFirst({
       where: {
-        id: id,
+        orderNumber: id, // Search by orderNumber instead of id
         userId: user.id,
       },
     });
@@ -193,7 +193,7 @@ export async function PUT(
     }
 
     const updatedOrder = await prisma.order.update({
-      where: { id: id },
+      where: { id: existingOrder.id }, // Use the actual order ID for update
       data: allowedUpdates,
       include: {
         items: {

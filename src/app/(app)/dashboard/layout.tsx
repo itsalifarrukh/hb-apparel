@@ -15,21 +15,14 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background">
       <div className="flex">
         {/* Sidebar */}
-        <Sidebar 
-          sidebarOpen={sidebarOpen} 
-          setSidebarOpen={setSidebarOpen} 
-        />
-        
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
         {/* Main content */}
         <div className="flex-1 lg:ml-64">
-          <DashboardHeader 
-            setSidebarOpen={setSidebarOpen}
-          />
-          
-          <main className="p-4 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
+          <DashboardHeader setSidebarOpen={setSidebarOpen} />
+
+          <main className="p-2 lg:p-4">
+            <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
       </div>

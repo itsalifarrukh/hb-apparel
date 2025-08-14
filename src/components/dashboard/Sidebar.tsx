@@ -1,15 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { 
-  User, 
-  ShoppingBag, 
-  Heart, 
-  ShoppingCart, 
-  MapPin, 
+import {
+  User,
+  ShoppingBag,
+  Heart,
+  ShoppingCart,
+  MapPin,
   CreditCard,
   Settings,
-  Home
+  Home,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -65,17 +65,19 @@ function SidebarContent() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 shrink-0 items-center px-4">
+      <div className="flex h-14 shrink-0 items-center px-4">
         <Link href="/" className="flex items-center space-x-2">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">HB</span>
+            <span className="text-primary-foreground font-bold text-sm">
+              HB
+            </span>
           </div>
           <span className="font-semibold text-lg">Dashboard</span>
         </Link>
       </div>
-      
+
       <Separator className="my-2" />
-      
+
       <div className="flex-1 px-4 py-2">
         <nav className="space-y-2">
           {navigation.map((item) => (
@@ -102,7 +104,7 @@ function SidebarContent() {
           ))}
         </nav>
       </div>
-      
+
       <div className="px-4 py-4">
         <Separator className="mb-4" />
         <Link

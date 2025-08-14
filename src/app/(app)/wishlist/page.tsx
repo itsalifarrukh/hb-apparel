@@ -146,7 +146,7 @@ function Wishlist() {
             Please sign in to view your wishlist.
           </p>
           <Button
-            onClick={() => router.push("/auth/signin")}
+            onClick={() => router.push("/sign-in")}
             className="mr-4 hover:bg-[#455A64] dark:hover:bg-[#f2fbff]"
           >
             Sign In

@@ -25,6 +25,7 @@ import {
   Phone,
 } from "lucide-react";
 import Image from "next/image";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function OrderDetailsPage() {
   const params = useParams();
@@ -103,6 +104,16 @@ export default function OrderDetailsPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Orders", href: "/dashboard/orders" },
+            {
+              label: "Order Details",
+              href: `/dashboard/orders/${orderId}`,
+            },
+          ]}
+        />
         <div className="max-w-2xl mx-auto text-center">
           <Alert className="border-destructive/20 bg-destructive/10">
             <AlertCircle className="h-4 w-4 text-destructive" />
@@ -118,14 +129,6 @@ export default function OrderDetailsPage() {
             </div>
 
             <div className="flex gap-4 justify-center">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/dashboard/orders")}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Orders
-              </Button>
               <Button onClick={() => dispatch(fetchOrder(orderId))}>
                 Try Again
               </Button>
@@ -139,6 +142,16 @@ export default function OrderDetailsPage() {
   if (!currentOrder) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumbs
+          items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Orders", href: "/dashboard/orders" },
+            {
+              label: "Order Details",
+              href: `/dashboard/orders/${orderId}`,
+            },
+          ]}
+        />
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-muted-foreground">
             <Package className="h-16 w-16 mx-auto mb-4 opacity-40" />
@@ -148,37 +161,26 @@ export default function OrderDetailsPage() {
               don&apos;t have permission to view it.
             </p>
           </div>
-
-          <div className="mt-8">
-            <Button
-              variant="outline"
-              onClick={() => router.push("/dashboard/orders")}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Orders
-            </Button>
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="container mx-auto px-4 py-2">
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Orders", href: "/dashboard/orders" },
+          {
+            label: "Order Details",
+            href: `/dashboard/orders/${orderId}`,
+          },
+        ]}
+      />
+      <div className="max-w-6xl mx-auto mt-5">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push("/dashboard/orders")}
-            className="gap-2 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all duration-200"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Orders
-          </Button>
-
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-foreground">
               Order #{currentOrder.orderNumber}
@@ -303,15 +305,15 @@ export default function OrderDetailsPage() {
             )}
 
             {/* Tracking Information */}
-            {currentOrder.trackingNumber && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-primary" />
-                    Tracking Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-primary" />
+                  Tracking Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentOrder.trackingNumber ? (
                   <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
                     <div>
                       <p className="font-medium">Tracking Number</p>
@@ -327,9 +329,21 @@ export default function OrderDetailsPage() {
                       Track Package
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="flex items-center justify-center p-8 bg-muted/30 rounded-lg border border-dashed">
+                    <div className="text-center">
+                      <Truck className="h-12 w-12 mx-auto mb-3 text-muted-foreground/40" />
+                      <p className="font-medium text-muted-foreground">
+                        Tracking information not available yet
+                      </p>
+                      <p className="text-sm text-muted-foreground/70 mt-1">
+                        You'll receive tracking details once your order ships
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -473,19 +487,22 @@ export default function OrderDetailsPage() {
               </Card>
             )}
 
-            {/* Notes */}
-            {currentOrder.customerNotes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Notes</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentOrder.customerNotes ? (
                   <p className="text-sm text-muted-foreground">
                     {currentOrder.customerNotes}
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground/70">
+                    <p className="text-sm">No order notes provided</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

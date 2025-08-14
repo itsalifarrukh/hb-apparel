@@ -207,11 +207,98 @@ export function ReviewStep() {
     }
   };
 
+  const handlePlaceOrderNow = async () => {
+    if (!checkoutSummary) return;
+
+    try {
+      setIsPlacingOrder(true);
+
+      // Validate required fields
+      if (!selectedShippingAddressId) {
+        throw new Error('Please select a shipping address');
+      }
+      
+      if (!useShippingAsBilling && !selectedBillingAddressId) {
+        throw new Error('Please select a billing address');
+      }
+
+      // Create the order without payment
+      const orderData = {
+        shippingAddressId: selectedShippingAddressId || undefined,
+        billingAddressId: useShippingAsBilling ? selectedShippingAddressId || undefined : selectedBillingAddressId || undefined,
+        // No payment method ID - order will be created with PENDING payment status
+      };
+
+      console.log('Creating order without payment:', orderData);
+      
+      const result = await dispatch(createOrder(orderData)).unwrap();
+      
+      console.log('Order created successfully:', result);
+
+      // Move to completion step explicitly
+      dispatch(setCurrentStep(4));
+
+      toast({
+        title: "Order Placed Successfully!",
+        description: `Your order #${result.orderNumber} has been placed. You can pay for it later from your orders page.`,
+      });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place order';
+      console.error('Error during order placement:', error);
+      
+      toast({
+        title: "Order Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
   if (!checkoutSummary) {
-    return null;
+    return (
+      <div className="text-center py-16">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-semibold mb-2">No Cart Found</h2>
+        <p className="text-muted-foreground mb-6">
+          Your cart appears to be empty. Please add some items before proceeding to checkout.
+        </p>
+        <Button onClick={() => router.push('/cart')} className="gap-2">
+          <ShoppingBag className="h-4 w-4" />
+          Go to Cart
+        </Button>
+      </div>
+    );
   }
 
   const { cart, orderSummary, addresses, paymentMethods } = checkoutSummary;
+
+  // Additional validation - prevent proceeding if cart is empty
+  if (!cart || !cart.items || cart.items.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-semibold mb-2">Cart is Empty</h2>
+        <p className="text-muted-foreground mb-6">
+          Please add some items to your cart before proceeding to checkout.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button variant="outline" onClick={() => router.push('/cart')} className="gap-2">
+            <ShoppingBag className="h-4 w-4" />
+            Go to Cart
+          </Button>
+          <Button onClick={() => router.push('/products')} className="gap-2">
+            Continue Shopping
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Find selected addresses and payment method
   const shippingAddress = addresses.find(
@@ -595,17 +682,31 @@ export function ReviewStep() {
           Back to Payment
         </Button>
 
-        <Button
-          onClick={handlePlaceOrder}
-          className="gap-2"
-          size="lg"
-          disabled={isPlacingOrder}
-        >
-          {isPlacingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isPlacingOrder
-            ? "Placing Order..."
-            : `Place Order - ${formatCurrency(orderSummary.totalAmount)}`}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={handlePlaceOrderNow}
+            variant="outline"
+            className="gap-2"
+            disabled={isPlacingOrder}
+          >
+            {isPlacingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPlacingOrder
+              ? "Placing Order..."
+              : "Place Order Now (Pay Later)"}
+          </Button>
+          
+          <Button
+            onClick={handlePlaceOrder}
+            className="gap-2"
+            size="lg"
+            disabled={isPlacingOrder}
+          >
+            {isPlacingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPlacingOrder
+              ? "Placing Order..."
+              : `Place Order & Pay - ${formatCurrency(orderSummary.totalAmount)}`}
+          </Button>
+        </div>
       </div>
     </div>
   );

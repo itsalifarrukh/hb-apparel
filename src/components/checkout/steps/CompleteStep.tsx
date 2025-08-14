@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
 // Removed unused useEffect import
-import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { resetCheckout } from '@/store/checkoutSlice';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
-import { 
-  CheckCircle, 
-  Package, 
-  Truck, 
-  Mail, 
-  Home, 
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { resetCheckout } from "@/store/checkoutSlice";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
+import {
+  CheckCircle,
+  Package,
+  Truck,
+  Mail,
+  Home,
   ArrowRight,
   Clock,
   CreditCard,
-  MapPin
-} from 'lucide-react';
+  MapPin,
+} from "lucide-react";
 
 export function CompleteStep() {
   const router = useRouter();
@@ -33,18 +33,18 @@ export function CompleteStep() {
 
   const handleContinueShopping = () => {
     dispatch(resetCheckout());
-    router.push('/products');
+    router.push("/products");
   };
 
   const handleViewOrder = () => {
     if (currentOrder) {
-      router.push(`/dashboard/orders/${currentOrder.id}`);
+      router.push(`/dashboard/orders/${currentOrder.orderNumber}`);
     }
   };
 
   const handleViewOrders = () => {
     dispatch(resetCheckout());
-    router.push('/dashboard/orders');
+    router.push("/dashboard/orders");
   };
 
   if (!currentOrder) {
@@ -57,7 +57,7 @@ export function CompleteStep() {
         <p className="text-muted-foreground mb-6">
           We couldn&apos;t find your order details.
         </p>
-        <Button onClick={() => router.push('/dashboard/orders')}>
+        <Button onClick={() => router.push("/dashboard/orders")}>
           View All Orders
         </Button>
       </div>
@@ -66,18 +66,18 @@ export function CompleteStep() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'CONFIRMED':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'PROCESSING':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'SHIPPED':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-200';
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "PROCESSING":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "SHIPPED":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "DELIVERED":
+        return "bg-green-100 text-green-800 border-green-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -88,14 +88,15 @@ export function CompleteStep() {
         <div className="w-20 h-20 bg-green-100 dark:bg-green-950/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="h-10 w-10 text-green-600" />
         </div>
-        
+
         <h1 className="text-3xl font-bold text-foreground mb-2">
           Order Placed Successfully! 🎉
         </h1>
         <p className="text-lg text-muted-foreground mb-4">
-          Thank you for your purchase. Your order has been received and is being processed.
+          Thank you for your purchase. Your order has been received and is being
+          processed.
         </p>
-        
+
         <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
           <span>Order #{currentOrder.orderNumber}</span>
           <span>•</span>
@@ -112,7 +113,7 @@ export function CompleteStep() {
               {currentOrder.status}
             </Badge>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -120,27 +121,33 @@ export function CompleteStep() {
               </div>
               <div>
                 <p className="font-medium text-sm">Processing</p>
-                <p className="text-xs text-muted-foreground">1-2 business days</p>
+                <p className="text-xs text-muted-foreground">
+                  1-2 business days
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Package className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <p className="font-medium text-sm">Packaging</p>
-                <p className="text-xs text-muted-foreground">1-2 business days</p>
+                <p className="text-xs text-muted-foreground">
+                  1-2 business days
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Truck className="h-4 w-4 text-primary" />
               </div>
               <div>
                 <p className="font-medium text-sm">Shipping</p>
-                <p className="text-xs text-muted-foreground">3-5 business days</p>
+                <p className="text-xs text-muted-foreground">
+                  3-5 business days
+                </p>
               </div>
             </div>
           </div>
@@ -151,13 +158,18 @@ export function CompleteStep() {
       <Card>
         <CardContent className="p-6">
           <h3 className="font-semibold text-foreground mb-4">Order Summary</h3>
-          
+
           <div className="space-y-3 mb-4">
             {currentOrder.items?.map((item) => (
-              <div key={item.id} className="flex items-center justify-between py-2">
+              <div
+                key={item.id}
+                className="flex items-center justify-between py-2"
+              >
                 <div className="flex-1">
                   <p className="font-medium text-sm">{item.productName}</p>
-                  <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Qty: {item.quantity}
+                  </p>
                 </div>
                 <p className="font-medium text-sm">
                   {formatCurrency(item.price * item.quantity)}
@@ -173,7 +185,7 @@ export function CompleteStep() {
               <span>Subtotal</span>
               <span>{formatCurrency(currentOrder.subtotal)}</span>
             </div>
-            
+
             {currentOrder.discountAmount > 0 && (
               <div className="flex justify-between text-sm">
                 <span>Discount</span>
@@ -182,7 +194,7 @@ export function CompleteStep() {
                 </span>
               </div>
             )}
-            
+
             <div className="flex justify-between text-sm">
               <span>Shipping</span>
               <span>
@@ -193,16 +205,16 @@ export function CompleteStep() {
                 )}
               </span>
             </div>
-            
+
             {currentOrder.taxAmount > 0 && (
               <div className="flex justify-between text-sm">
                 <span>Tax</span>
                 <span>{formatCurrency(currentOrder.taxAmount)}</span>
               </div>
             )}
-            
+
             <Separator className="my-2" />
-            
+
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
               <span>{formatCurrency(currentOrder.totalAmount)}</span>
@@ -214,8 +226,10 @@ export function CompleteStep() {
       {/* Delivery Information */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold text-foreground mb-4">Delivery Information</h3>
-          
+          <h3 className="font-semibold text-foreground mb-4">
+            Delivery Information
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Shipping Address */}
             {currentOrder.shippingAddress && (
@@ -231,7 +245,9 @@ export function CompleteStep() {
                     <p>{currentOrder.shippingAddress.streetLine2}</p>
                   )}
                   <p>
-                    {currentOrder.shippingAddress.city}, {currentOrder.shippingAddress.state} {currentOrder.shippingAddress.zipCode}
+                    {currentOrder.shippingAddress.city},{" "}
+                    {currentOrder.shippingAddress.state}{" "}
+                    {currentOrder.shippingAddress.zipCode}
                   </p>
                   <p>{currentOrder.shippingAddress.country}</p>
                 </div>
@@ -249,7 +265,9 @@ export function CompleteStep() {
                   <p>•••• •••• •••• {currentOrder.paymentMethod.last4}</p>
                   <p>{currentOrder.paymentMethod.billingName}</p>
                   {currentOrder.paymentMethod.brand && (
-                    <p className="capitalize">{currentOrder.paymentMethod.brand}</p>
+                    <p className="capitalize">
+                      {currentOrder.paymentMethod.brand}
+                    </p>
                   )}
                 </div>
               </div>
@@ -266,10 +284,15 @@ export function CompleteStep() {
               <Mail className="h-4 w-4 text-primary" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground mb-2">What happens next?</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                What happens next?
+              </h3>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>• You&apos;ll receive an email confirmation shortly</p>
-                <p>• We&apos;ll send you tracking information when your order ships</p>
+                <p>
+                  • We&apos;ll send you tracking information when your order
+                  ships
+                </p>
                 <p>• You can track your order status in your account</p>
                 <p>• Estimated delivery: 5-7 business days</p>
               </div>
@@ -282,28 +305,21 @@ export function CompleteStep() {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={handleContinueShopping}
           className="gap-2"
         >
           <Home className="h-4 w-4" />
           Continue Shopping
         </Button>
-        
-        <Button 
-          onClick={handleViewOrder}
-          className="gap-2"
-        >
+
+        <Button onClick={handleViewOrder} className="gap-2">
           View Order Details
           <ArrowRight className="h-4 w-4" />
         </Button>
-        
-        <Button 
-          variant="outline"
-          onClick={handleViewOrders}
-          className="gap-2"
-        >
+
+        <Button variant="outline" onClick={handleViewOrders} className="gap-2">
           <Package className="h-4 w-4" />
           View All Orders
         </Button>

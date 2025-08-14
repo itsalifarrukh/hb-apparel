@@ -1,17 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchOrders, clearError } from '@/store/ordersSlice';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { formatCurrency } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchOrders, clearError } from "@/store/ordersSlice";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatCurrency } from "@/lib/utils";
 import {
   Search,
   Package,
@@ -23,22 +29,22 @@ import {
   AlertCircle,
   Plus,
   ShoppingBag,
-} from 'lucide-react';
-import type { Order } from '@/types/frontend';
-import Link from 'next/link';
+} from "lucide-react";
+import type { Order } from "@/types/frontend";
+import Link from "next/link";
 
 export function OrdersComponent() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { orders, loading, error } = useAppSelector((state) => state.orders);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('newest');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   useEffect(() => {
     dispatch(fetchOrders({}));
-    
+
     return () => {
       dispatch(clearError());
     };
@@ -46,44 +52,49 @@ export function OrdersComponent() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-300';
-      case 'CONFIRMED':
-        return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300';
-      case 'PROCESSING':
-        return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/20 dark:text-purple-300';
-      case 'SHIPPED':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-300';
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/20 dark:text-green-300';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/20 dark:text-red-300';
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-300";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/20 dark:text-blue-300";
+      case "PROCESSING":
+        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/20 dark:text-purple-300";
+      case "SHIPPED":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-300";
+      case "DELIVERED":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-950/20 dark:text-green-300";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-950/20 dark:text-red-300";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-950/20 dark:text-gray-300';
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-950/20 dark:text-gray-300";
     }
   };
 
   const filteredAndSortedOrders = orders
     .filter((order: Order) => {
-      const matchesSearch = 
+      const matchesSearch =
         order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.items?.some(item => 
+        order.items?.some((item) =>
           item.productName.toLowerCase().includes(searchQuery.toLowerCase())
         );
-      
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-      
+
+      const matchesStatus =
+        statusFilter === "all" || order.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     })
     .sort((a: Order, b: Order) => {
       switch (sortBy) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case 'highest':
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "highest":
           return b.totalAmount - a.totalAmount;
-        case 'lowest':
+        case "lowest":
           return a.totalAmount - b.totalAmount;
         default:
           return 0;
@@ -92,10 +103,13 @@ export function OrdersComponent() {
 
   const orderStats = {
     total: orders.length,
-    pending: orders.filter((order: Order) => order.status === 'PENDING').length,
-    processing: orders.filter((order: Order) => ['CONFIRMED', 'PROCESSING'].includes(order.status)).length,
-    shipped: orders.filter((order: Order) => order.status === 'SHIPPED').length,
-    delivered: orders.filter((order: Order) => order.status === 'DELIVERED').length,
+    pending: orders.filter((order: Order) => order.status === "PENDING").length,
+    processing: orders.filter((order: Order) =>
+      ["CONFIRMED", "PROCESSING"].includes(order.status)
+    ).length,
+    shipped: orders.filter((order: Order) => order.status === "SHIPPED").length,
+    delivered: orders.filter((order: Order) => order.status === "DELIVERED")
+      .length,
   };
 
   if (loading && orders.length === 0) {
@@ -126,7 +140,7 @@ export function OrdersComponent() {
             Track and manage your order history
           </p>
         </div>
-        
+
         <Link href="/checkout">
           <Button className="gap-2 hover:scale-105 transition-all duration-200">
             <Plus className="h-4 w-4" />
@@ -146,7 +160,7 @@ export function OrdersComponent() {
             <p className="text-xs text-muted-foreground">Total Orders</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-950/20 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -156,7 +170,7 @@ export function OrdersComponent() {
             <p className="text-xs text-muted-foreground">Pending</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-950/20 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -166,7 +180,7 @@ export function OrdersComponent() {
             <p className="text-xs text-muted-foreground">Processing</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-950/20 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -176,7 +190,7 @@ export function OrdersComponent() {
             <p className="text-xs text-muted-foreground">Shipped</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4 text-center">
             <div className="w-8 h-8 bg-green-100 dark:bg-green-950/20 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -203,7 +217,7 @@ export function OrdersComponent() {
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40">
@@ -220,7 +234,7 @@ export function OrdersComponent() {
                   <SelectItem value="CANCELLED">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
@@ -232,15 +246,17 @@ export function OrdersComponent() {
                   <SelectItem value="lowest">Lowest Amount</SelectItem>
                 </SelectContent>
               </Select>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => dispatch(fetchOrders({}))}
                 disabled={loading}
                 className="px-3"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                />
               </Button>
             </div>
           </div>
@@ -265,26 +281,27 @@ export function OrdersComponent() {
               <ShoppingBag className="h-8 w-8 text-muted-foreground/50" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              {searchQuery || statusFilter !== 'all' ? 'No orders match your filters' : 'No orders yet'}
+              {searchQuery || statusFilter !== "all"
+                ? "No orders match your filters"
+                : "No orders yet"}
             </h3>
             <p className="text-muted-foreground mb-6">
-              {searchQuery || statusFilter !== 'all' 
-                ? 'Try adjusting your search criteria or filters.'
-                : "You haven't placed any orders yet. Start shopping to see your orders here."
-              }
+              {searchQuery || statusFilter !== "all"
+                ? "Try adjusting your search criteria or filters."
+                : "You haven't placed any orders yet. Start shopping to see your orders here."}
             </p>
-            {!searchQuery && statusFilter === 'all' && (
+            {!searchQuery && statusFilter === "all" && (
               <Link href="/products">
                 <Button>Start Shopping</Button>
               </Link>
             )}
-            {(searchQuery || statusFilter !== 'all') && (
+            {(searchQuery || statusFilter !== "all") && (
               <div className="flex gap-2 justify-center">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
-                    setSearchQuery('');
-                    setStatusFilter('all');
+                    setSearchQuery("");
+                    setStatusFilter("all");
                   }}
                 >
                   Clear Filters
@@ -299,8 +316,8 @@ export function OrdersComponent() {
       ) : (
         <div className="space-y-4">
           {filteredAndSortedOrders.map((order: Order) => (
-            <Card 
-              key={order.id} 
+            <Card
+              key={order.id}
               className="hover:shadow-lg transition-all duration-200 hover:border-primary/20"
             >
               <CardContent className="p-6">
@@ -317,10 +334,10 @@ export function OrdersComponent() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
+                        {new Date(order.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
                         })}
                       </span>
                       <span>•</span>
@@ -331,43 +348,53 @@ export function OrdersComponent() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/dashboard/orders/${order.id}`)}
+                    onClick={() =>
+                      router.push(`/dashboard/orders/${order.orderNumber}`)
+                    }
                     className="gap-2 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all duration-200"
                   >
                     <Eye className="h-4 w-4" />
                     View Details
                   </Button>
                 </div>
-                
+
                 {/* Order Items Preview */}
                 <div className="space-y-2">
                   {order.items?.slice(0, 2).map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 text-sm">
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 text-sm"
+                    >
                       <div className="w-2 h-2 bg-primary/30 rounded-full"></div>
                       <span className="font-medium">{item.productName}</span>
-                      <span className="text-muted-foreground">x{item.quantity}</span>
+                      <span className="text-muted-foreground">
+                        x{item.quantity}
+                      </span>
                       <span className="ml-auto font-medium">
                         {formatCurrency(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
-                  
+
                   {order.items && order.items.length > 2 && (
                     <div className="text-sm text-muted-foreground pl-5">
                       +{order.items.length - 2} more items
                     </div>
                   )}
                 </div>
-                
+
                 {/* Shipping Address Preview */}
                 {order.shippingAddress && (
                   <div className="mt-4 pt-4 border-t border-border">
                     <div className="text-xs text-muted-foreground">
-                      <span className="font-medium">Shipping to:</span> {order.shippingAddress.fullName}, {order.shippingAddress.city}, {order.shippingAddress.state}
+                      <span className="font-medium">Shipping to:</span>{" "}
+                      {order.shippingAddress.fullName},{" "}
+                      {order.shippingAddress.city},{" "}
+                      {order.shippingAddress.state}
                     </div>
                   </div>
                 )}
@@ -386,4 +413,3 @@ export function OrdersComponent() {
     </div>
   );
 }
-

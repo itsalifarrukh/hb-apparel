@@ -118,7 +118,7 @@ function Cart() {
           <p className="text-muted-foreground mb-8">
             Please sign in to view your shopping cart.
           </p>
-          <Button onClick={() => router.push("/auth/signin")} className="mr-4">
+          <Button onClick={() => router.push("/sign-in")} className="mr-4">
             Sign In
           </Button>
           <Button variant="outline" onClick={() => router.push("/")}>
