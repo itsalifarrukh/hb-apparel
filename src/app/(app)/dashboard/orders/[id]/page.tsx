@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchOrder, clearCurrentOrder } from "@/store/ordersSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { formatCurrency } from "@/lib/utils";
 import {
-  ArrowLeft,
   Package,
   MapPin,
   CreditCard,
@@ -29,7 +28,6 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function OrderDetailsPage() {
   const params = useParams();
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const orderId = params.id as string;
 
@@ -337,7 +335,8 @@ export default function OrderDetailsPage() {
                         Tracking information not available yet
                       </p>
                       <p className="text-sm text-muted-foreground/70 mt-1">
-                        You'll receive tracking details once your order ships
+                        You&apos;ll receive tracking details once your order
+                        ships
                       </p>
                     </div>
                   </div>

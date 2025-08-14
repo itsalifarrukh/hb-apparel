@@ -130,8 +130,10 @@ export async function POST(
       });
 
       if (paymentMethod?.stripePaymentMethodId) {
-        paymentIntentParams.payment_method = paymentMethod.stripePaymentMethodId;
-        delete (paymentIntentParams as any).automatic_payment_methods;
+        paymentIntentParams.payment_method =
+          paymentMethod.stripePaymentMethodId;
+        delete (paymentIntentParams as Stripe.PaymentIntentCreateParams)
+          .automatic_payment_methods;
         paymentIntentParams.payment_method_types = ["card"];
         paymentIntentParams.confirmation_method = "manual";
         paymentIntentParams.confirm = true;
@@ -146,7 +148,8 @@ export async function POST(
     } else if (validatedData.stripePaymentMethodId) {
       // Use new payment method
       paymentIntentParams.payment_method = validatedData.stripePaymentMethodId;
-      delete (paymentIntentParams as any).automatic_payment_methods;
+      delete (paymentIntentParams as Stripe.PaymentIntentCreateParams)
+        .automatic_payment_methods;
       paymentIntentParams.payment_method_types = ["card"];
       paymentIntentParams.confirmation_method = "manual";
       paymentIntentParams.confirm = true;
@@ -158,7 +161,7 @@ export async function POST(
           const stripePaymentMethod = await stripe.paymentMethods.retrieve(
             validatedData.stripePaymentMethodId
           );
-          
+
           const savedPaymentMethod = await prisma.paymentMethod.create({
             data: {
               userId: user.id,
@@ -167,8 +170,12 @@ export async function POST(
               brand: stripePaymentMethod.card?.brand || "",
               expiryMonth: stripePaymentMethod.card?.exp_month,
               expiryYear: stripePaymentMethod.card?.exp_year,
-              billingName: stripePaymentMethod.billing_details?.name || user.firstName + " " + user.lastName || "Unknown",
-              billingEmail: stripePaymentMethod.billing_details?.email || user.email || "",
+              billingName:
+                stripePaymentMethod.billing_details?.name ||
+                user.firstName + " " + user.lastName ||
+                "Unknown",
+              billingEmail:
+                stripePaymentMethod.billing_details?.email || user.email || "",
             },
           });
 
@@ -193,15 +200,19 @@ export async function POST(
       );
     }
 
-    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
+    const paymentIntent = await stripe.paymentIntents.create(
+      paymentIntentParams
+    );
 
     // Update order with payment intent ID and status
     await prisma.order.update({
       where: { id: order.id },
       data: {
         stripePaymentIntentId: paymentIntent.id,
-        paymentStatus: paymentIntent.status === "succeeded" ? "SUCCEEDED" : "PROCESSING",
-        status: paymentIntent.status === "succeeded" ? "CONFIRMED" : order.status,
+        paymentStatus:
+          paymentIntent.status === "succeeded" ? "SUCCEEDED" : "PROCESSING",
+        status:
+          paymentIntent.status === "succeeded" ? "CONFIRMED" : order.status,
       },
     });
 
@@ -216,7 +227,6 @@ export async function POST(
       },
       message: "Payment intent created successfully",
     });
-
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -230,11 +240,11 @@ export async function POST(
     }
 
     // Stripe SDK error handling
-    const maybeStripeError = error as { 
-      type?: string; 
-      code?: string; 
-      message?: string; 
-      rawType?: string; 
+    const maybeStripeError = error as {
+      type?: string;
+      code?: string;
+      message?: string;
+      rawType?: string;
     };
     if (
       maybeStripeError &&
